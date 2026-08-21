@@ -4,167 +4,331 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Velarde Courtside - Pickleball Court Booking</title>
+  <meta name="description" content="Book your pickleball court at Velarde Courtside. 4 premium courts, easy online booking, GCash payments accepted.">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Poppins:wght@700;800;900&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="styles.css">
 </head>
 <body>
+
+  <!-- Navbar -->
   <nav class="navbar">
     <div class="container">
-      <div class="logo">
+      <a href="#top" class="logo">
         <span class="logo-text">🎾 Velarde Courtside</span>
-      </div>
+      </a>
       <ul class="nav-links">
+        <li><a href="#courts" class="nav-link">Courts</a></li>
         <li><a href="#booking" class="nav-link">Book Now</a></li>
-        <li><a href="#admin" class="nav-link">Admin</a></li>
       </ul>
     </div>
   </nav>
 
-  <main class="container">
-    <!-- Booking Section -->
-    <section id="booking" class="booking-section">
-      <h1>Reserve Your Court</h1>
-      <p class="subtitle">Book a pickleball court at Velarde Courtside</p>
-
-      <div class="booking-form-container">
-        <form id="bookingForm" class="booking-form">
-          <!-- User Information -->
-          <fieldset>
-            <legend>Your Information</legend>
-            
-            <div class="form-group">
-              <label for="name">Full Name *</label>
-              <input type="text" id="name" name="name" required>
-            </div>
-
-            <div class="form-group">
-              <label for="email">Email Address *</label>
-              <input type="email" id="email" name="email" required>
-            </div>
-
-            <div class="form-group">
-              <label for="phone">Phone Number *</label>
-              <input type="tel" id="phone" name="phone" required>
-            </div>
-          </fieldset>
-
-          <!-- Booking Details -->
-          <fieldset>
-            <legend>Booking Details</legend>
-
-            <div class="form-group">
-              <label for="court">Court Number *</label>
-              <select id="court" name="court" required>
-                <option value="">Select a court</option>
-                <option value="1">Court 1</option>
-                <option value="2">Court 2</option>
-                <option value="3">Court 3</option>
-                <option value="4">Court 4</option>
-              </select>
-            </div>
-
-            <div class="form-group">
-              <label for="date">Booking Date *</label>
-              <input type="date" id="date" name="date" required>
-            </div>
-
-            <div class="form-group">
-              <label for="startTime">Start Time *</label>
-              <select id="startTime" name="startTime" required>
-                <option value="">Select start time</option>
-              </select>
-            </div>
-
-            <div class="form-group">
-              <label for="duration">Duration (Hours) *</label>
-              <select id="duration" name="duration" required>
-                <option value="">Select duration</option>
-                <option value="1">1 Hour - ₱500</option>
-                <option value="2">2 Hours - ₱900</option>
-                <option value="3">3 Hours - ₱1,200</option>
-              </select>
-            </div>
-
-            <div class="price-display">
-              <span>Total Price:</span>
-              <span id="totalPrice" class="price">₱0</span>
-            </div>
-          </fieldset>
-
-          <button type="submit" class="btn btn-primary">Book & Pay Now</button>
-        </form>
+  <!-- Hero -->
+  <header class="hero" id="top">
+    <div class="container hero-inner">
+      <div class="hero-content">
+        <span class="hero-badge">🏓 Now open · 4 courts available</span>
+        <h1>Play Pickleball at <br>Velarde Courtside</h1>
+        <p>Premium indoor courts, flexible hourly rates, and instant online booking. Reserve your slot in under a minute.</p>
+        <div class="hero-actions">
+          <a href="#booking" class="btn btn-accent btn-lg">Book Your Court</a>
+          <a href="#courts" class="btn btn-outline-light btn-lg">View Courts</a>
+        </div>
+        <div class="hero-stats">
+          <div class="hero-stat"><strong>4</strong><span>Courts</span></div>
+          <div class="hero-stat"><strong>7AM–7PM</strong><span>Daily Hours</span></div>
+          <div class="hero-stat"><strong>₱250/hr</strong><span>Starting Rate</span></div>
+        </div>
       </div>
-    </section>
+      <div class="hero-visual">
+        <svg class="court-illustration" viewBox="0 0 400 260" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+          <rect x="10" y="10" width="380" height="240" rx="14" fill="#1273d1"/>
+          <rect x="26" y="26" width="348" height="208" rx="8" fill="#1a86ec"/>
+          <line x1="200" y1="26" x2="200" y2="234" stroke="#ffffff" stroke-width="3"/>
+          <rect x="140" y="112" width="120" height="36" fill="none" stroke="#d9f522" stroke-width="3"/>
+          <line x1="140" y1="130" x2="26" y2="130" stroke="#ffffff" stroke-width="2" stroke-dasharray="6 6" opacity="0.7"/>
+          <line x1="260" y1="130" x2="374" y2="130" stroke="#ffffff" stroke-width="2" stroke-dasharray="6 6" opacity="0.7"/>
+          <rect x="26" y="26" width="348" height="208" rx="8" fill="none" stroke="#ffffff" stroke-width="2" opacity="0.5"/>
+          <circle cx="90" cy="70" r="7" fill="#d9f522"/>
+          <circle cx="310" cy="190" r="7" fill="#d9f522"/>
+        </svg>
+      </div>
+    </div>
+  </header>
 
-    <!-- Payment Modal -->
-    <div id="paymentModal" class="modal">
-      <div class="modal-content">
-        <span class="close">&times;</span>
-        <h2>Complete Payment</h2>
-        
-        <div class="booking-summary">
-          <h3>Booking Summary</h3>
-          <div class="summary-item">
-            <span>Court:</span>
-            <span id="summaryCourtNumber">-</span>
-          </div>
-          <div class="summary-item">
-            <span>Date:</span>
-            <span id="summaryDate">-</span>
-          </div>
-          <div class="summary-item">
-            <span>Time:</span>
-            <span id="summaryTime">-</span>
-          </div>
-          <div class="summary-item">
-            <span>Duration:</span>
-            <span id="summaryDuration">-</span>
-          </div>
-          <div class="summary-item total">
-            <span>Total Amount:</span>
-            <span id="summaryAmount">₱0</span>
-          </div>
+  <!-- Courts Showcase -->
+  <section id="courts" class="section">
+    <div class="container">
+      <div class="section-head">
+        <span class="section-tag">Our Facilities</span>
+        <h2>Pick Your Court</h2>
+        <p>Four professional-grade pickleball courts, all maintained daily and available for hourly reservation.</p>
+      </div>
+      <div class="courts-showcase">
+        <div class="showcase-card">
+          <div class="showcase-icon">1</div>
+          <h3>Court 1 — Pro</h3>
+          <p>Tournament-standard surface with pro net system. Perfect for competitive matches.</p>
         </div>
+        <div class="showcase-card">
+          <div class="showcase-icon">2</div>
+          <h3>Court 2 — Classic</h3>
+          <p>Our most popular court. Great bounce, great lighting, great rallies.</p>
+        </div>
+        <div class="showcase-card">
+          <div class="showcase-icon">3</div>
+          <h3>Court 3 — Family</h3>
+          <p>Ideal for beginners and family games. Relaxed pace, friendly vibe.</p>
+        </div>
+        <div class="showcase-card">
+          <div class="showcase-icon">4</div>
+          <h3>Court 4 — Training</h3>
+          <p>Equipped with ball machines and practice zones for skill sessions.</p>
+        </div>
+      </div>
+    </div>
+  </section>
 
-        <div class="payment-section">
-          <h3>Payment Method: GCash</h3>
-          <div class="gcash-info">
-            <p><strong>Merchant:</strong> Velarde Courtside</p>
-            <p><strong>Amount:</strong> <span id="paymentAmount">₱0</span></p>
-            <p>Please send the payment via GCash to the provided account.</p>
+  <!-- How It Works -->
+  <section class="section section-alt">
+    <div class="container">
+      <div class="section-head">
+        <span class="section-tag">How It Works</span>
+        <h2>Book in 3 Easy Steps</h2>
+        <p>From choosing a court to stepping onto it — the whole process takes less than a minute.</p>
+      </div>
+      <div class="steps-grid">
+        <div class="step-card">
+          <span class="step-num">01</span>
+          <h3>Choose Your Court &amp; Time</h3>
+          <p>Select from our four courts, pick your date and see real-time available slots.</p>
+        </div>
+        <div class="step-card">
+          <span class="step-num">02</span>
+          <h3>Enter Your Details</h3>
+          <p>Just your name, email and phone number. No account signup required.</p>
+        </div>
+        <div class="step-card">
+          <span class="step-num">03</span>
+          <h3>Pay via GCash or Counter</h3>
+          <p>Scan our GCash QR for instant confirmation, or reserve now and pay at the venue.</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Booking -->
+  <main id="booking" class="section booking-section">
+    <div class="container">
+      <div class="section-head">
+        <span class="section-tag">Reservation</span>
+        <h2>Reserve Your Court</h2>
+        <p>Three quick steps: choose a court, enter details, then confirm payment.</p>
+      </div>
+
+      <ul class="steps-indicator">
+        <li class="step-ind active" data-step="1"><span class="step-dot">1</span><span class="step-label">Choose Court</span></li>
+        <li class="step-ind" data-step="2"><span class="step-dot">2</span><span class="step-label">Your Details</span></li>
+        <li class="step-ind" data-step="3"><span class="step-dot">3</span><span class="step-label">Payment</span></li>
+      </ul>
+
+      <div class="wizard-container">
+        <form id="bookingForm" class="booking-form">
+
+          <!-- STEP 1: Court Selection -->
+          <div id="stepCourt" class="wizard-panel active">
+            <div class="form-group">
+              <label>Select a court to continue</label>
+              <div class="court-grid" id="courtGrid">
+                <button type="button" class="court-card" data-court="1">
+                  <span class="court-number">1</span>
+                  <span class="court-name">Court 1</span>
+                  <span class="court-status available">Available</span>
+                </button>
+                <button type="button" class="court-card" data-court="2">
+                  <span class="court-number">2</span>
+                  <span class="court-name">Court 2</span>
+                  <span class="court-status available">Available</span>
+                </button>
+                <button type="button" class="court-card" data-court="3">
+                  <span class="court-number">3</span>
+                  <span class="court-name">Court 3</span>
+                  <span class="court-status available">Available</span>
+                </button>
+                <button type="button" class="court-card" data-court="4">
+                  <span class="court-number">4</span>
+                  <span class="court-name">Court 4</span>
+                  <span class="court-status available">Available</span>
+                </button>
+              </div>
+              <input type="hidden" id="court" name="court">
+            </div>
+            <p class="wizard-hint">Tap a court card to continue ↓</p>
           </div>
 
-          <div class="form-group">
-            <label for="gcashRef">GCash Reference Number *</label>
-            <input type="text" id="gcashRef" placeholder="Enter your GCash transaction reference" required>
+          <!-- STEP 2: Details -->
+          <div id="stepDetails" class="wizard-panel">
+            <div class="selected-court-line">
+              🏓 Selected court: <strong id="selectedCourtLabel">Court -</strong>
+              <button type="button" id="changeCourtBtn" class="link-btn">Change</button>
+            </div>
+
+            <fieldset>
+              <legend>Your Information</legend>
+              <div class="form-row">
+                <div class="form-group">
+                  <label for="name">Full Name *</label>
+                  <input type="text" id="name" name="name" placeholder="Juan Dela Cruz" required>
+                </div>
+                <div class="form-group">
+                  <label for="phone">Phone Number *</label>
+                  <input type="tel" id="phone" name="phone" placeholder="09XX XXX XXXX" required>
+                </div>
+              </div>
+              <div class="form-group">
+                <label for="email">Email Address *</label>
+                <input type="email" id="email" name="email" placeholder="you@example.com" required>
+              </div>
+            </fieldset>
+
+            <fieldset>
+              <legend>Booking Details</legend>
+              <div class="form-row">
+                <div class="form-group">
+                  <label for="date">Booking Date *</label>
+                  <input type="date" id="date" name="date" required>
+                </div>
+                <div class="form-group">
+                  <label for="startTime">Start Time *</label>
+                  <select id="startTime" name="startTime" required>
+                    <option value="">Select start time</option>
+                  </select>
+                </div>
+              </div>
+              <div class="form-group">
+                <label for="duration">Duration *</label>
+                <select id="duration" name="duration" required>
+                  <option value="">Select duration</option>
+                  <option value="1">1 Hour — ₱500</option>
+                  <option value="2">2 Hours — ₱900 (Save ₱100)</option>
+                  <option value="3">3 Hours — ₱1,200 (Save ₱300)</option>
+                </select>
+              </div>
+              <div class="price-display">
+                <span>Total Price:</span>
+                <span id="totalPrice" class="price">₱0</span>
+              </div>
+            </fieldset>
+
+            <div class="wizard-actions">
+              <button type="button" id="backToCourtsBtn" class="btn btn-outline">← Back</button>
+              <button type="submit" class="btn btn-primary">Continue to Payment →</button>
+            </div>
           </div>
 
-          <button type="button" id="confirmPaymentBtn" class="btn btn-primary">Confirm Payment</button>
-        </div>
+          <!-- STEP 3: Payment -->
+          <div id="stepPayment" class="wizard-panel">
+            <h3 class="payment-title">Confirm &amp; Pay</h3>
 
-        <div id="successMessage" class="success-message" style="display: none;">
-          <h3>✓ Booking Confirmed!</h3>
-          <p>Your pickleball court has been successfully booked.</p>
-          <p>Please arrive 10 minutes early.</p>
-          <button type="button" class="btn btn-secondary" onclick="location.reload()">Book Another</button>
-        </div>
+            <fieldset>
+              <legend>Booking Summary</legend>
+              <div class="summary-item"><span>Court:</span><span id="payCourt">-</span></div>
+              <div class="summary-item"><span>Date:</span><span id="payDate">-</span></div>
+              <div class="summary-item"><span>Time:</span><span id="payTime">-</span></div>
+              <div class="summary-item total"><span>Total Amount:</span><span id="payAmount">₱0</span></div>
+            </fieldset>
+
+            <fieldset>
+              <legend>Payment Method</legend>
+              <label class="pay-option">
+                <input type="radio" name="paymentMethod" value="gcash" checked>
+                <div class="pay-option-body">
+                  <div class="pay-option-head">
+                    <span class="pay-option-icon">📱</span>
+                    <div>
+                      <strong>GCash</strong>
+                      <small>Instant confirmation via QR or send directly</small>
+                    </div>
+                  </div>
+                  <div id="gcashDetails" class="gcash-details expanded">
+                    <div class="gcash-qr-wrap">
+                      <img src="images/gcash-qr.svg" alt="GCash QR Code" class="gcash-qr">
+                      <p class="qr-note">Scan with your GCash app</p>
+                    </div>
+                    <div class="gcash-number-box">
+                      <small>GCash Number</small>
+                      <p class="gcash-number">0917 123 4567</p>
+                      <small>Velarde Courtside</small>
+                    </div>
+                    <div class="form-group">
+                      <label for="gcashRef">GCash Reference Number *</label>
+                      <input type="text" id="gcashRef" placeholder="Enter your GCash transaction reference" required>
+                    </div>
+                  </div>
+                </div>
+              </label>
+
+              <label class="pay-option">
+                <input type="radio" name="paymentMethod" value="counter">
+                <div class="pay-option-body">
+                  <div class="pay-option-head">
+                    <span class="pay-option-icon">🏟️</span>
+                    <div>
+                      <strong>Pay at Counter</strong>
+                      <small>Reserve now, settle payment at the venue</small>
+                    </div>
+                  </div>
+                  <div id="counterDetails" class="counter-details">
+                    <p>Your slot will be reserved under your name. Please pay at the front desk at least <strong>10 minutes</strong> before your scheduled time, or your reservation may be released.</p>
+                  </div>
+                </div>
+              </label>
+            </fieldset>
+
+            <div class="wizard-actions">
+              <button type="button" id="backToDetailsBtn" class="btn btn-outline">← Back</button>
+              <button type="button" id="confirmBookingBtn" class="btn btn-primary">Confirm Booking ✓</button>
+            </div>
+          </div>
+
+        </form>
       </div>
     </div>
   </main>
 
-  <!-- Admin Section -->
-  <section id="admin" class="admin-section">
-    <div class="container">
-      <h2>Admin Dashboard</h2>
-      <div id="adminLoginForm">
-        <input type="password" id="adminPassword" placeholder="Enter admin password">
-        <button onclick="adminLogin()" class="btn btn-primary">Login</button>
+  <!-- Success Modal -->
+  <div id="successModal" class="modal">
+    <div class="modal-content success-modal-content">
+      <div class="success-icon">✓</div>
+      <h2 id="successTitle">Booking Confirmed!</h2>
+      <p class="success-text" id="successMessage"></p>
+      <div class="receipt-summary">
+        <div class="summary-item"><span>Reference:</span><span id="receiptRef">-</span></div>
+        <div class="summary-item"><span>Court:</span><span id="receiptCourt">-</span></div>
+        <div class="summary-item"><span>Date:</span><span id="receiptDate">-</span></div>
+        <div class="summary-item"><span>Time:</span><span id="receiptTime">-</span></div>
+        <div class="summary-item"><span>Payment:</span><span id="receiptPayment">-</span></div>
+        <div class="summary-item total"><span>Total Amount:</span><span id="receiptAmount">₱0</span></div>
       </div>
-      <div id="adminDashboard" style="display: none;">
-        <!-- Admin content will be loaded here -->
-        <a href="admin.html" class="btn btn-primary">Open Admin Dashboard</a>
+      <div class="success-actions">
+        <button type="button" id="downloadReceiptBtn" class="btn btn-primary">Download Receipt</button>
+        <button type="button" id="bookAnotherBtn" class="btn btn-outline">Book Another Court</button>
       </div>
     </div>
-  </section>
+  </div>
+
+  <!-- Footer -->
+  <footer class="footer">
+    <div class="container">
+      <div class="footer-brand">
+        <span class="logo-text">🎾 Velarde Courtside</span>
+      </div>
+      <p class="footer-note">Open Daily · 7:00 AM – 7:00 PM · Walk-ins welcome based on availability</p>
+      <p class="footer-copy">&copy; 2026 Velarde Courtside. All rights reserved.</p>
+    </div>
+  </footer>
 
   <script src="script.js"></script>
 </body>
