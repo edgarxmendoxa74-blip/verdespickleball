@@ -100,33 +100,38 @@ CREATE INDEX IF NOT EXISTS idx_admin_accounts_username ON admin_accounts(usernam
 CREATE INDEX IF NOT EXISTS idx_admin_logs_admin_id ON admin_logs(admin_id);
 CREATE INDEX IF NOT EXISTS idx_admin_logs_created_at ON admin_logs(created_at DESC);
 
--- Insert sample data
-INSERT OR IGNORE INTO website_settings (id, site_name, phone, email, address, operating_hours_start, operating_hours_end, site_description, about_text)
-VALUES ('default-settings', 'Velarde Courtside', '+639123456789', 'info@velardepickleball.com', '123 Main St, City', '07:00', '19:00', 'Welcome to Velarde Courtside Pickleball', 'Your premier pickleball facility');
+-- Insert sample data (PostgreSQL compatible)
+INSERT INTO website_settings (id, site_name, phone, email, address, operating_hours_start, operating_hours_end, site_description, about_text)
+VALUES ('default-settings', 'Velarde Courtside', '+639123456789', 'info@velardepickleball.com', '123 Main St, City', '07:00', '19:00', 'Welcome to Velarde Courtside Pickleball', 'Your premier pickleball facility')
+ON CONFLICT DO NOTHING;
 
-INSERT OR IGNORE INTO courts (id, court_number, name, description, capacity, surface_type, status)
+INSERT INTO courts (id, court_number, name, description, capacity, surface_type, status)
 VALUES 
   ('court-1', 1, 'Court 1', 'Premium court', 4, 'Acrylic', 'active'),
   ('court-2', 2, 'Court 2', 'Standard court', 4, 'Acrylic', 'active'),
   ('court-3', 3, 'Court 3', 'Standard court', 4, 'Acrylic', 'active'),
-  ('court-4', 4, 'Court 4', 'Practice court', 4, 'Clay', 'active');
+  ('court-4', 4, 'Court 4', 'Practice court', 4, 'Clay', 'active')
+ON CONFLICT DO NOTHING;
 
-INSERT OR IGNORE INTO pricing (id, duration_hours, price_amount, day_type, description, is_active)
+INSERT INTO pricing (id, duration_hours, price_amount, day_type, description, is_active)
 VALUES 
-  ('price-1', 1, 500, 'weekday', 'One hour weekday rate', 1),
-  ('price-2', 2, 900, 'weekday', 'Two hour weekday rate', 1),
-  ('price-3', 3, 1200, 'weekday', 'Three hour weekday rate', 1),
-  ('price-4', 1, 600, 'weekend', 'One hour weekend rate', 1),
-  ('price-5', 2, 1100, 'weekend', 'Two hour weekend rate', 1);
+  ('price-1', 1, 500, 'weekday', 'One hour weekday rate', true),
+  ('price-2', 2, 900, 'weekday', 'Two hour weekday rate', true),
+  ('price-3', 3, 1200, 'weekday', 'Three hour weekday rate', true),
+  ('price-4', 1, 600, 'weekend', 'One hour weekend rate', true),
+  ('price-5', 2, 1100, 'weekend', 'Two hour weekend rate', true)
+ON CONFLICT DO NOTHING;
 
-INSERT OR IGNORE INTO payment_methods (id, method_name, description, instructions, account_details, is_active)
+INSERT INTO payment_methods (id, method_name, description, instructions, account_details, is_active)
 VALUES 
-  ('gcash', 'GCash', 'Pay via GCash mobile wallet', 'Send payment to the provided GCash account number', '09171234567', 1),
-  ('bank', 'Bank Transfer', 'Transfer via bank account', 'Use the provided bank account details', 'BDO: 123-456-789012', 1);
+  ('gcash', 'GCash', 'Pay via GCash mobile wallet', 'Send payment to the provided GCash account number', '09171234567', true),
+  ('bank', 'Bank Transfer', 'Transfer via bank account', 'Use the provided bank account details', 'BDO: 123-456-789012', true)
+ON CONFLICT DO NOTHING;
 
-INSERT OR IGNORE INTO admin_accounts (id, username, email, full_name, password_hash, role, is_active)
+INSERT INTO admin_accounts (id, username, email, full_name, password_hash, role, is_active)
 VALUES 
-  ('admin-default', 'admin', 'admin@velardepickleball.com', 'Administrator', 'admin123', 'super_admin', 1);
+  ('admin-default', 'admin', 'admin@velardepickleball.com', 'Administrator', 'admin123', 'super_admin', true)
+ON CONFLICT DO NOTHING;
 
 -- Verify tables exist
 -- SELECT name FROM sqlite_master WHERE type='table' ORDER BY name;
