@@ -1,0 +1,171 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Velarde Courtside - Pickleball Court Booking</title>
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+  <nav class="navbar">
+    <div class="container">
+      <div class="logo">
+        <span class="logo-text">🎾 Velarde Courtside</span>
+      </div>
+      <ul class="nav-links">
+        <li><a href="#booking" class="nav-link">Book Now</a></li>
+        <li><a href="#admin" class="nav-link">Admin</a></li>
+      </ul>
+    </div>
+  </nav>
+
+  <main class="container">
+    <!-- Booking Section -->
+    <section id="booking" class="booking-section">
+      <h1>Reserve Your Court</h1>
+      <p class="subtitle">Book a pickleball court at Velarde Courtside</p>
+
+      <div class="booking-form-container">
+        <form id="bookingForm" class="booking-form">
+          <!-- User Information -->
+          <fieldset>
+            <legend>Your Information</legend>
+            
+            <div class="form-group">
+              <label for="name">Full Name *</label>
+              <input type="text" id="name" name="name" required>
+            </div>
+
+            <div class="form-group">
+              <label for="email">Email Address *</label>
+              <input type="email" id="email" name="email" required>
+            </div>
+
+            <div class="form-group">
+              <label for="phone">Phone Number *</label>
+              <input type="tel" id="phone" name="phone" required>
+            </div>
+          </fieldset>
+
+          <!-- Booking Details -->
+          <fieldset>
+            <legend>Booking Details</legend>
+
+            <div class="form-group">
+              <label for="court">Court Number *</label>
+              <select id="court" name="court" required>
+                <option value="">Select a court</option>
+                <option value="1">Court 1</option>
+                <option value="2">Court 2</option>
+                <option value="3">Court 3</option>
+                <option value="4">Court 4</option>
+              </select>
+            </div>
+
+            <div class="form-group">
+              <label for="date">Booking Date *</label>
+              <input type="date" id="date" name="date" required>
+            </div>
+
+            <div class="form-group">
+              <label for="startTime">Start Time *</label>
+              <select id="startTime" name="startTime" required>
+                <option value="">Select start time</option>
+              </select>
+            </div>
+
+            <div class="form-group">
+              <label for="duration">Duration (Hours) *</label>
+              <select id="duration" name="duration" required>
+                <option value="">Select duration</option>
+                <option value="1">1 Hour - ₱500</option>
+                <option value="2">2 Hours - ₱900</option>
+                <option value="3">3 Hours - ₱1,200</option>
+              </select>
+            </div>
+
+            <div class="price-display">
+              <span>Total Price:</span>
+              <span id="totalPrice" class="price">₱0</span>
+            </div>
+          </fieldset>
+
+          <button type="submit" class="btn btn-primary">Book & Pay Now</button>
+        </form>
+      </div>
+    </section>
+
+    <!-- Payment Modal -->
+    <div id="paymentModal" class="modal">
+      <div class="modal-content">
+        <span class="close">&times;</span>
+        <h2>Complete Payment</h2>
+        
+        <div class="booking-summary">
+          <h3>Booking Summary</h3>
+          <div class="summary-item">
+            <span>Court:</span>
+            <span id="summaryCourtNumber">-</span>
+          </div>
+          <div class="summary-item">
+            <span>Date:</span>
+            <span id="summaryDate">-</span>
+          </div>
+          <div class="summary-item">
+            <span>Time:</span>
+            <span id="summaryTime">-</span>
+          </div>
+          <div class="summary-item">
+            <span>Duration:</span>
+            <span id="summaryDuration">-</span>
+          </div>
+          <div class="summary-item total">
+            <span>Total Amount:</span>
+            <span id="summaryAmount">₱0</span>
+          </div>
+        </div>
+
+        <div class="payment-section">
+          <h3>Payment Method: GCash</h3>
+          <div class="gcash-info">
+            <p><strong>Merchant:</strong> Velarde Courtside</p>
+            <p><strong>Amount:</strong> <span id="paymentAmount">₱0</span></p>
+            <p>Please send the payment via GCash to the provided account.</p>
+          </div>
+
+          <div class="form-group">
+            <label for="gcashRef">GCash Reference Number *</label>
+            <input type="text" id="gcashRef" placeholder="Enter your GCash transaction reference" required>
+          </div>
+
+          <button type="button" id="confirmPaymentBtn" class="btn btn-primary">Confirm Payment</button>
+        </div>
+
+        <div id="successMessage" class="success-message" style="display: none;">
+          <h3>✓ Booking Confirmed!</h3>
+          <p>Your pickleball court has been successfully booked.</p>
+          <p>Please arrive 10 minutes early.</p>
+          <button type="button" class="btn btn-secondary" onclick="location.reload()">Book Another</button>
+        </div>
+      </div>
+    </div>
+  </main>
+
+  <!-- Admin Section -->
+  <section id="admin" class="admin-section">
+    <div class="container">
+      <h2>Admin Dashboard</h2>
+      <div id="adminLoginForm">
+        <input type="password" id="adminPassword" placeholder="Enter admin password">
+        <button onclick="adminLogin()" class="btn btn-primary">Login</button>
+      </div>
+      <div id="adminDashboard" style="display: none;">
+        <!-- Admin content will be loaded here -->
+        <a href="admin.html" class="btn btn-primary">Open Admin Dashboard</a>
+      </div>
+    </div>
+  </section>
+
+  <script src="script.js"></script>
+</body>
+</html>

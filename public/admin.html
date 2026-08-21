@@ -1,0 +1,166 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Admin Dashboard - Velarde Courtside</title>
+  <link rel="stylesheet" href="admin-styles.css">
+</head>
+<body>
+  <div class="admin-container">
+    <!-- Sidebar -->
+    <aside class="sidebar">
+      <div class="sidebar-header">
+        <h1>🎾 Velarde Courtside</h1>
+        <p>Admin Panel</p>
+      </div>
+      <nav class="sidebar-nav">
+        <a href="#dashboard" class="nav-item active" onclick="showSection('dashboard')">Dashboard</a>
+        <a href="#bookings" class="nav-item" onclick="showSection('bookings')">Bookings</a>
+        <a href="#time-tracking" class="nav-item" onclick="showSection('time-tracking')">Time Tracking</a>
+        <a href="#" class="nav-item logout" onclick="logout()">Logout</a>
+      </nav>
+    </aside>
+
+    <!-- Main Content -->
+    <main class="main-content">
+      <!-- Header -->
+      <header class="admin-header">
+        <h2 id="pageTitle">Dashboard</h2>
+        <div class="header-actions">
+          <span id="currentTime"></span>
+          <button onclick="refreshData()" class="btn-refresh">🔄 Refresh</button>
+        </div>
+      </header>
+
+      <!-- Dashboard Section -->
+      <section id="dashboard" class="section active">
+        <div class="stats-grid">
+          <div class="stat-card">
+            <div class="stat-icon">📅</div>
+            <div class="stat-info">
+              <h3>Today's Bookings</h3>
+              <p class="stat-number" id="todayBookings">0</p>
+            </div>
+          </div>
+
+          <div class="stat-card">
+            <div class="stat-icon">✅</div>
+            <div class="stat-info">
+              <h3>Completed</h3>
+              <p class="stat-number" id="completedBookings">0</p>
+            </div>
+          </div>
+
+          <div class="stat-card">
+            <div class="stat-icon">💰</div>
+            <div class="stat-info">
+              <h3>Total Revenue</h3>
+              <p class="stat-number" id="totalRevenue">₱0</p>
+            </div>
+          </div>
+
+          <div class="stat-card">
+            <div class="stat-icon">🏢</div>
+            <div class="stat-info">
+              <h3>Total Bookings</h3>
+              <p class="stat-number" id="totalBookings">0</p>
+            </div>
+          </div>
+        </div>
+
+        <div class="recent-bookings">
+          <h3>Today's Schedule</h3>
+          <div id="todaySchedule" class="schedule-list">
+            <p class="empty-state">No bookings for today</p>
+          </div>
+        </div>
+      </section>
+
+      <!-- Bookings Section -->
+      <section id="bookings" class="section">
+        <div class="bookings-header">
+          <h3>All Bookings</h3>
+          <div class="filter-controls">
+            <select id="statusFilter" onchange="filterBookings()">
+              <option value="">All Status</option>
+              <option value="pending">Pending Payment</option>
+              <option value="confirmed">Confirmed</option>
+              <option value="cancelled">Cancelled</option>
+            </select>
+            <input type="date" id="dateFilter" onchange="filterBookings()">
+          </div>
+        </div>
+
+        <div class="bookings-table-wrapper">
+          <table class="bookings-table">
+            <thead>
+              <tr>
+                <th>Date & Time</th>
+                <th>Guest Name</th>
+                <th>Court</th>
+                <th>Duration</th>
+                <th>Amount</th>
+                <th>Status</th>
+                <th>Actions</th>
+              </tr>
+            </thead>
+            <tbody id="bookingsTableBody">
+              <tr>
+                <td colspan="7" class="empty-state">Loading bookings...</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </section>
+
+      <!-- Time Tracking Section -->
+      <section id="time-tracking" class="section">
+        <h3>Time Tracking</h3>
+        <div class="time-tracking-container">
+          <div class="tracking-search">
+            <input type="date" id="trackingDate" onchange="loadTimeTracking()">
+            <button onclick="loadTimeTracking()" class="btn-primary">Load</button>
+          </div>
+
+          <div class="tracking-list" id="trackingList">
+            <p class="empty-state">Select a date to view bookings</p>
+          </div>
+        </div>
+      </section>
+    </main>
+  </div>
+
+  <!-- Check-in/Check-out Modal -->
+  <div id="trackingModal" class="modal">
+    <div class="modal-content">
+      <span class="close" onclick="closeTrackingModal()">&times;</span>
+      <h2>Time Tracking</h2>
+      
+      <div class="tracking-info" id="trackingInfo"></div>
+
+      <div class="tracking-actions">
+        <button id="checkInBtn" onclick="checkIn()" class="btn btn-primary">Check In</button>
+        <button id="checkOutBtn" onclick="checkOut()" class="btn btn-secondary" disabled>Check Out</button>
+      </div>
+
+      <div id="trackingResult" class="tracking-result"></div>
+    </div>
+  </div>
+
+  <!-- Cancel Booking Modal -->
+  <div id="cancelModal" class="modal">
+    <div class="modal-content">
+      <span class="close" onclick="closeCancelModal()">&times;</span>
+      <h2>Cancel Booking</h2>
+      <p>Are you sure you want to cancel this booking?</p>
+      <div class="modal-actions">
+        <button onclick="confirmCancel()" class="btn btn-danger">Yes, Cancel</button>
+        <button onclick="closeCancelModal()" class="btn btn-secondary">No, Keep It</button>
+      </div>
+    </div>
+  </div>
+
+  <script src="admin-script.js"></script>
+</body>
+</html>
