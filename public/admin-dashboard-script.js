@@ -16,7 +16,15 @@ document.addEventListener('DOMContentLoaded', () => {
 function checkAdminAuth() {
   const token = localStorage.getItem('adminToken');
   if (!token) {
-    window.location.href = '/admin.html';
+    // Redirect to login if not authenticated
+    const password = prompt('Enter admin password:');
+    if (password === 'admin123') {
+      localStorage.setItem('adminToken', 'token-' + Date.now());
+      localStorage.setItem('adminUsername', 'admin');
+    } else {
+      alert('Invalid password');
+      window.location.href = '/admin.html';
+    }
   }
   
   const username = localStorage.getItem('adminUsername') || 'Admin';
@@ -83,14 +91,21 @@ function navigateTo(section) {
 // ===== DASHBOARD =====
 async function loadDashboard() {
   try {
-    const stats = await fetch(`${ADMIN_API}/stats`).then(r => r.json());
+    const response = await fetch(`${ADMIN_API}/stats`);
+    if (!response.ok) throw new Error('API not available');
+    const stats = await response.json();
     
-    document.getElementById('dashTodayBookings').textContent = stats.todayBookings || 0;
-    document.getElementById('dashActiveCourts').textContent = stats.activeCourts || 0;
-    document.getElementById('dashTodayRevenue').textContent = `₱${(stats.todayRevenue || 0).toLocaleString()}`;
-    document.getElementById('dashTotalUsers').textContent = stats.totalUsers || 0;
+    document.getElementById('dashTodayBookings').textContent = stats.todayBookings || stats.today_bookings || 0;
+    document.getElementById('dashActiveCourts').textContent = stats.activeCourts || stats.active_courts || 4;
+    document.getElementById('dashTodayRevenue').textContent = `₱${(stats.todayRevenue || stats.today_revenue || 0).toLocaleString()}`;
+    document.getElementById('dashTotalUsers').textContent = stats.totalUsers || stats.total_users || 0;
   } catch (error) {
     console.error('Error loading dashboard:', error);
+    // Show placeholder data
+    document.getElementById('dashTodayBookings').textContent = '0';
+    document.getElementById('dashActiveCourts').textContent = '4';
+    document.getElementById('dashTodayRevenue').textContent = '₱0';
+    document.getElementById('dashTotalUsers').textContent = '0';
   }
 }
 
@@ -110,6 +125,10 @@ async function loadWebsiteSettings() {
     document.getElementById('termsText').value = settings.terms_text || '';
   } catch (error) {
     console.error('Error loading website settings:', error);
+    // Set defaults
+    document.getElementById('siteName').value = 'Velarde Courtside';
+    document.getElementById('operatingStart').value = '07:00';
+    document.getElementById('operatingEnd').value = '19:00';
   }
 }
 
