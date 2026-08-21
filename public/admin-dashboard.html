@@ -1,0 +1,453 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Admin Dashboard - Velarde Courtside</title>
+  <link rel="stylesheet" href="admin-dashboard-styles.css">
+</head>
+<body>
+  <div class="admin-container">
+    <!-- Sidebar -->
+    <aside class="sidebar">
+      <div class="sidebar-header">
+        <h1>🎾 Velarde Courtside</h1>
+        <p>Admin Control Center</p>
+      </div>
+      <nav class="sidebar-nav">
+        <a href="#dashboard" class="nav-item active" onclick="navigateTo('dashboard')">Dashboard</a>
+        <a href="#website-settings" class="nav-item" onclick="navigateTo('website-settings')">Website Settings</a>
+        <a href="#courts" class="nav-item" onclick="navigateTo('courts')">Court Management</a>
+        <a href="#pricing" class="nav-item" onclick="navigateTo('pricing')">Pricing</a>
+        <a href="#payment-methods" class="nav-item" onclick="navigateTo('payment-methods')">Payment Methods</a>
+        <a href="#bookings" class="nav-item" onclick="navigateTo('bookings')">Bookings</a>
+        <a href="#time-monitoring" class="nav-item" onclick="navigateTo('time-monitoring')">Time Monitoring</a>
+        <a href="#admin-accounts" class="nav-item" onclick="navigateTo('admin-accounts')">Admin Accounts</a>
+        <a href="#activity-log" class="nav-item" onclick="navigateTo('activity-log')">Activity Log</a>
+        <a href="#" class="nav-item logout" onclick="logout()">Logout</a>
+      </nav>
+    </aside>
+
+    <!-- Main Content -->
+    <main class="main-content">
+      <!-- Header -->
+      <header class="admin-header">
+        <h2 id="pageTitle">Dashboard</h2>
+        <div class="header-actions">
+          <span id="currentTime"></span>
+          <span id="adminUser"></span>
+        </div>
+      </header>
+
+      <!-- Dashboard Section -->
+      <section id="dashboard-section" class="section active">
+        <div class="dashboard-grid">
+          <div class="stat-card">
+            <div class="stat-icon">📅</div>
+            <div class="stat-info">
+              <h3>Today's Bookings</h3>
+              <p class="stat-number" id="dashTodayBookings">0</p>
+            </div>
+          </div>
+          <div class="stat-card">
+            <div class="stat-icon">✅</div>
+            <div class="stat-info">
+              <h3>Active Courts</h3>
+              <p class="stat-number" id="dashActiveCourts">0</p>
+            </div>
+          </div>
+          <div class="stat-card">
+            <div class="stat-icon">💰</div>
+            <div class="stat-info">
+              <h3>Today's Revenue</h3>
+              <p class="stat-number" id="dashTodayRevenue">₱0</p>
+            </div>
+          </div>
+          <div class="stat-card">
+            <div class="stat-icon">👥</div>
+            <div class="stat-info">
+              <h3>Total Users</h3>
+              <p class="stat-number" id="dashTotalUsers">0</p>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- Website Settings Section -->
+      <section id="website-settings-section" class="section">
+        <div class="settings-container">
+          <h3>Website Settings</h3>
+          <form id="websiteSettingsForm" class="settings-form">
+            <div class="form-row">
+              <div class="form-group">
+                <label for="siteName">Site Name</label>
+                <input type="text" id="siteName" required>
+              </div>
+              <div class="form-group">
+                <label for="sitePhone">Phone</label>
+                <input type="tel" id="sitePhone">
+              </div>
+            </div>
+            <div class="form-row">
+              <div class="form-group">
+                <label for="siteEmail">Email</label>
+                <input type="email" id="siteEmail">
+              </div>
+              <div class="form-group">
+                <label for="siteAddress">Address</label>
+                <input type="text" id="siteAddress">
+              </div>
+            </div>
+            <div class="form-row">
+              <div class="form-group">
+                <label for="operatingStart">Operating Hours Start</label>
+                <input type="time" id="operatingStart">
+              </div>
+              <div class="form-group">
+                <label for="operatingEnd">Operating Hours End</label>
+                <input type="time" id="operatingEnd">
+              </div>
+            </div>
+            <div class="form-group">
+              <label for="siteDescription">Site Description</label>
+              <textarea id="siteDescription" rows="4"></textarea>
+            </div>
+            <div class="form-group">
+              <label for="aboutText">About Us</label>
+              <textarea id="aboutText" rows="4"></textarea>
+            </div>
+            <div class="form-group">
+              <label for="termsText">Terms & Conditions</label>
+              <textarea id="termsText" rows="4"></textarea>
+            </div>
+            <button type="submit" class="btn btn-primary">Save Settings</button>
+          </form>
+        </div>
+      </section>
+
+      <!-- Courts Management Section -->
+      <section id="courts-section" class="section">
+        <div class="section-header">
+          <h3>Court Management</h3>
+          <button onclick="openCourtModal()" class="btn btn-primary">+ Add Court</button>
+        </div>
+        <div class="courts-grid" id="courtsGrid">
+          <p>Loading courts...</p>
+        </div>
+      </section>
+
+      <!-- Pricing Management Section -->
+      <section id="pricing-section" class="section">
+        <div class="section-header">
+          <h3>Pricing Management</h3>
+          <button onclick="openPricingModal()" class="btn btn-primary">+ Add Price</button>
+        </div>
+        <table class="data-table">
+          <thead>
+            <tr>
+              <th>Duration</th>
+              <th>Price</th>
+              <th>Day Type</th>
+              <th>Status</th>
+              <th>Actions</th>
+            </tr>
+          </thead>
+          <tbody id="pricingTableBody">
+            <tr><td colspan="5">Loading pricing...</td></tr>
+          </tbody>
+        </table>
+      </section>
+
+      <!-- Payment Methods Section -->
+      <section id="payment-methods-section" class="section">
+        <div class="section-header">
+          <h3>Payment Methods</h3>
+          <button onclick="openPaymentMethodModal()" class="btn btn-primary">+ Add Method</button>
+        </div>
+        <div class="payment-methods-grid" id="paymentMethodsGrid">
+          <p>Loading payment methods...</p>
+        </div>
+      </section>
+
+      <!-- Bookings Management Section -->
+      <section id="bookings-section" class="section">
+        <div class="section-header">
+          <h3>Bookings Management</h3>
+          <div class="filter-controls">
+            <input type="date" id="bookingDateFilter">
+            <select id="bookingStatusFilter">
+              <option value="">All Status</option>
+              <option value="pending">Pending</option>
+              <option value="confirmed">Confirmed</option>
+              <option value="cancelled">Cancelled</option>
+            </select>
+            <button onclick="loadBookings()" class="btn btn-secondary">Filter</button>
+          </div>
+        </div>
+        <table class="data-table">
+          <thead>
+            <tr>
+              <th>Date & Time</th>
+              <th>Guest</th>
+              <th>Court</th>
+              <th>Duration</th>
+              <th>Price</th>
+              <th>Status</th>
+              <th>Actions</th>
+            </tr>
+          </thead>
+          <tbody id="bookingsTableBody">
+            <tr><td colspan="7">Loading bookings...</td></tr>
+          </tbody>
+        </table>
+      </section>
+
+      <!-- Time Monitoring Section -->
+      <section id="time-monitoring-section" class="section">
+        <div class="section-header">
+          <h3>Time Monitoring - Court Usage</h3>
+          <input type="date" id="monitoringDate" onchange="loadTimeMonitoring()">
+        </div>
+        <div class="time-monitoring-list" id="timeMonitoringList">
+          <p>Select a date to view bookings</p>
+        </div>
+      </section>
+
+      <!-- Admin Accounts Section -->
+      <section id="admin-accounts-section" class="section">
+        <div class="section-header">
+          <h3>Admin Accounts</h3>
+          <button onclick="openAdminAccountModal()" class="btn btn-primary">+ Add Admin</button>
+        </div>
+        <table class="data-table">
+          <thead>
+            <tr>
+              <th>Username</th>
+              <th>Full Name</th>
+              <th>Email</th>
+              <th>Role</th>
+              <th>Status</th>
+              <th>Last Login</th>
+              <th>Actions</th>
+            </tr>
+          </thead>
+          <tbody id="adminAccountsTableBody">
+            <tr><td colspan="7">Loading admin accounts...</td></tr>
+          </tbody>
+        </table>
+      </section>
+
+      <!-- Activity Log Section -->
+      <section id="activity-log-section" class="section">
+        <div class="section-header">
+          <h3>Activity Log</h3>
+          <button onclick="exportActivityLog()" class="btn btn-secondary">Export</button>
+        </div>
+        <table class="data-table">
+          <thead>
+            <tr>
+              <th>Admin</th>
+              <th>Action</th>
+              <th>Entity Type</th>
+              <th>Timestamp</th>
+            </tr>
+          </thead>
+          <tbody id="activityLogTableBody">
+            <tr><td colspan="4">Loading activity log...</td></tr>
+          </tbody>
+        </table>
+      </section>
+    </main>
+  </div>
+
+  <!-- Modals -->
+  <!-- Court Modal -->
+  <div id="courtModal" class="modal">
+    <div class="modal-content">
+      <span class="close" onclick="closeCourtModal()">&times;</span>
+      <h2>Court Details</h2>
+      <form id="courtForm" class="modal-form">
+        <div class="form-group">
+          <label for="courtNumber">Court Number</label>
+          <input type="number" id="courtNumber" min="1" max="10" required>
+        </div>
+        <div class="form-group">
+          <label for="courtName">Court Name</label>
+          <input type="text" id="courtName" required>
+        </div>
+        <div class="form-group">
+          <label for="courtDescription">Description</label>
+          <textarea id="courtDescription" rows="3"></textarea>
+        </div>
+        <div class="form-group">
+          <label for="courtCapacity">Capacity</label>
+          <input type="number" id="courtCapacity" value="4">
+        </div>
+        <div class="form-group">
+          <label for="courtSurface">Surface Type</label>
+          <input type="text" id="courtSurface" placeholder="e.g., Acrylic, Clay">
+        </div>
+        <div class="form-group">
+          <label for="courtStatus">Status</label>
+          <select id="courtStatus">
+            <option value="active">Active</option>
+            <option value="maintenance">Maintenance</option>
+            <option value="inactive">Inactive</option>
+          </select>
+        </div>
+        <button type="submit" class="btn btn-primary">Save Court</button>
+      </form>
+    </div>
+  </div>
+
+  <!-- Pricing Modal -->
+  <div id="pricingModal" class="modal">
+    <div class="modal-content">
+      <span class="close" onclick="closePricingModal()">&times;</span>
+      <h2>Pricing Details</h2>
+      <form id="pricingForm" class="modal-form">
+        <div class="form-group">
+          <label for="pricingDuration">Duration (Hours)</label>
+          <input type="number" id="pricingDuration" min="1" required>
+        </div>
+        <div class="form-group">
+          <label for="pricingAmount">Price (₱)</label>
+          <input type="number" id="pricingAmount" min="0" step="0.01" required>
+        </div>
+        <div class="form-group">
+          <label for="pricingDayType">Day Type</label>
+          <select id="pricingDayType">
+            <option value="weekday">Weekday</option>
+            <option value="weekend">Weekend</option>
+            <option value="holiday">Holiday</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label for="pricingDescription">Description</label>
+          <input type="text" id="pricingDescription" placeholder="e.g., Regular Rate">
+        </div>
+        <div class="form-group">
+          <label>
+            <input type="checkbox" id="pricingActive" checked> Active
+          </label>
+        </div>
+        <button type="submit" class="btn btn-primary">Save Price</button>
+      </form>
+    </div>
+  </div>
+
+  <!-- Payment Method Modal -->
+  <div id="paymentMethodModal" class="modal">
+    <div class="modal-content">
+      <span class="close" onclick="closePaymentMethodModal()">&times;</span>
+      <h2>Payment Method Details</h2>
+      <form id="paymentMethodForm" class="modal-form">
+        <div class="form-group">
+          <label for="methodName">Payment Method Name</label>
+          <input type="text" id="methodName" placeholder="e.g., GCash" required>
+        </div>
+        <div class="form-group">
+          <label for="methodDescription">Description</label>
+          <textarea id="methodDescription" rows="2"></textarea>
+        </div>
+        <div class="form-group">
+          <label for="methodInstructions">Payment Instructions</label>
+          <textarea id="methodInstructions" rows="3"></textarea>
+        </div>
+        <div class="form-group">
+          <label for="methodAccountDetails">Account Details</label>
+          <input type="text" id="methodAccountDetails" placeholder="e.g., 09171234567">
+        </div>
+        <div class="form-group">
+          <label>
+            <input type="checkbox" id="methodActive" checked> Active
+          </label>
+        </div>
+        <button type="submit" class="btn btn-primary">Save Payment Method</button>
+      </form>
+    </div>
+  </div>
+
+  <!-- Booking Edit Modal -->
+  <div id="bookingModal" class="modal">
+    <div class="modal-content">
+      <span class="close" onclick="closeBookingModal()">&times;</span>
+      <h2>Edit Booking</h2>
+      <form id="bookingForm" class="modal-form">
+        <div class="form-group">
+          <label for="bookingGuest">Guest Name</label>
+          <input type="text" id="bookingGuest" readonly>
+        </div>
+        <div class="form-group">
+          <label for="bookingCourt">Court</label>
+          <select id="bookingCourt" required></select>
+        </div>
+        <div class="form-group">
+          <label for="bookingDate">Date</label>
+          <input type="date" id="bookingDate" required>
+        </div>
+        <div class="form-group">
+          <label for="bookingStartTime">Start Time</label>
+          <input type="time" id="bookingStartTime" required>
+        </div>
+        <div class="form-group">
+          <label for="bookingDuration">Duration (Hours)</label>
+          <input type="number" id="bookingDuration" min="1" required>
+        </div>
+        <div class="form-group">
+          <label for="bookingStatus">Status</label>
+          <select id="bookingStatus" required>
+            <option value="pending">Pending</option>
+            <option value="confirmed">Confirmed</option>
+            <option value="cancelled">Cancelled</option>
+          </select>
+        </div>
+        <button type="submit" class="btn btn-primary">Save Booking</button>
+      </form>
+    </div>
+  </div>
+
+  <!-- Admin Account Modal -->
+  <div id="adminAccountModal" class="modal">
+    <div class="modal-content">
+      <span class="close" onclick="closeAdminAccountModal()">&times;</span>
+      <h2>Admin Account</h2>
+      <form id="adminAccountForm" class="modal-form">
+        <div class="form-group">
+          <label for="adminUsername">Username</label>
+          <input type="text" id="adminUsername" required>
+        </div>
+        <div class="form-group">
+          <label for="adminEmail">Email</label>
+          <input type="email" id="adminEmail" required>
+        </div>
+        <div class="form-group">
+          <label for="adminFullName">Full Name</label>
+          <input type="text" id="adminFullName" required>
+        </div>
+        <div class="form-group">
+          <label for="adminPassword">Password</label>
+          <input type="password" id="adminPassword">
+          <small>Leave blank to keep current password</small>
+        </div>
+        <div class="form-group">
+          <label for="adminRole">Role</label>
+          <select id="adminRole" required>
+            <option value="admin">Admin</option>
+            <option value="super_admin">Super Admin</option>
+            <option value="manager">Manager</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label>
+            <input type="checkbox" id="adminActive" checked> Active
+          </label>
+        </div>
+        <button type="submit" class="btn btn-primary">Save Admin Account</button>
+      </form>
+    </div>
+  </div>
+
+  <script src="admin-dashboard-script.js"></script>
+</body>
+</html>
