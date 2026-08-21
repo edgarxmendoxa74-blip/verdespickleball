@@ -147,73 +147,37 @@ DROP POLICY IF EXISTS "Enable read for all users" ON admin_logs;
 DROP POLICY IF EXISTS "Enable insert for authenticated" ON admin_logs;
 
 -- Website Settings policies
-CREATE POLICY "Enable read for all users" ON website_settings
-  FOR SELECT USING (true);
-
-CREATE POLICY "Enable insert for authenticated" ON website_settings
-  FOR INSERT WITH CHECK (true);
-
-CREATE POLICY "Enable update for authenticated" ON website_settings
-  FOR UPDATE USING (true);
+CREATE POLICY "Enable read for all users" ON website_settings FOR SELECT USING (true);
+CREATE POLICY "Enable insert for authenticated" ON website_settings FOR INSERT WITH CHECK (true);
+CREATE POLICY "Enable update for authenticated" ON website_settings FOR UPDATE USING (true);
 
 -- Courts policies
-CREATE POLICY "Enable read for all users" ON courts
-  FOR SELECT USING (true);
-
-CREATE POLICY "Enable insert for authenticated" ON courts
-  FOR INSERT WITH CHECK (true);
-
-CREATE POLICY "Enable update for authenticated" ON courts
-  FOR UPDATE USING (true);
-
-CREATE POLICY "Enable delete for authenticated" ON courts
-  FOR DELETE USING (true);
+CREATE POLICY "Enable read for all users" ON courts FOR SELECT USING (true);
+CREATE POLICY "Enable insert for authenticated" ON courts FOR INSERT WITH CHECK (true);
+CREATE POLICY "Enable update for authenticated" ON courts FOR UPDATE USING (true);
+CREATE POLICY "Enable delete for authenticated" ON courts FOR DELETE USING (true);
 
 -- Pricing policies
-CREATE POLICY "Enable read for all users" ON pricing
-  FOR SELECT USING (true);
-
-CREATE POLICY "Enable insert for authenticated" ON pricing
-  FOR INSERT WITH CHECK (true);
-
-CREATE POLICY "Enable update for authenticated" ON pricing
-  FOR UPDATE USING (true);
-
-CREATE POLICY "Enable delete for authenticated" ON pricing
-  FOR DELETE USING (true);
+CREATE POLICY "Enable read for all users" ON pricing FOR SELECT USING (true);
+CREATE POLICY "Enable insert for authenticated" ON pricing FOR INSERT WITH CHECK (true);
+CREATE POLICY "Enable update for authenticated" ON pricing FOR UPDATE USING (true);
+CREATE POLICY "Enable delete for authenticated" ON pricing FOR DELETE USING (true);
 
 -- Payment methods policies
-CREATE POLICY "Enable read for all users" ON payment_methods
-  FOR SELECT USING (true);
-
-CREATE POLICY "Enable insert for authenticated" ON payment_methods
-  FOR INSERT WITH CHECK (true);
-
-CREATE POLICY "Enable update for authenticated" ON payment_methods
-  FOR UPDATE USING (true);
-
-CREATE POLICY "Enable delete for authenticated" ON payment_methods
-  FOR DELETE USING (true);
+CREATE POLICY "Enable read for all users" ON payment_methods FOR SELECT USING (true);
+CREATE POLICY "Enable insert for authenticated" ON payment_methods FOR INSERT WITH CHECK (true);
+CREATE POLICY "Enable update for authenticated" ON payment_methods FOR UPDATE USING (true);
+CREATE POLICY "Enable delete for authenticated" ON payment_methods FOR DELETE USING (true);
 
 -- Admin accounts policies
-CREATE POLICY "Enable read for all users" ON admin_accounts
-  FOR SELECT USING (true);
-
-CREATE POLICY "Enable insert for authenticated" ON admin_accounts
-  FOR INSERT WITH CHECK (true);
-
-CREATE POLICY "Enable update for authenticated" ON admin_accounts
-  FOR UPDATE USING (true);
-
-CREATE POLICY "Enable delete for authenticated" ON admin_accounts
-  FOR DELETE USING (true);
+CREATE POLICY "Enable read for all users" ON admin_accounts FOR SELECT USING (true);
+CREATE POLICY "Enable insert for authenticated" ON admin_accounts FOR INSERT WITH CHECK (true);
+CREATE POLICY "Enable update for authenticated" ON admin_accounts FOR UPDATE USING (true);
+CREATE POLICY "Enable delete for authenticated" ON admin_accounts FOR DELETE USING (true);
 
 -- Admin logs policies
-CREATE POLICY "Enable read for all users" ON admin_logs
-  FOR SELECT USING (true);
-
-CREATE POLICY "Enable insert for authenticated" ON admin_logs
-  FOR INSERT WITH CHECK (true);
+CREATE POLICY "Enable read for all users" ON admin_logs FOR SELECT USING (true);
+CREATE POLICY "Enable insert for authenticated" ON admin_logs FOR INSERT WITH CHECK (true);
 
 -- ========================================
 -- INSERT SAMPLE DATA
