@@ -115,8 +115,36 @@ ALTER TABLE admin_accounts ENABLE ROW LEVEL SECURITY;
 ALTER TABLE admin_logs ENABLE ROW LEVEL SECURITY;
 
 -- ========================================
--- CREATE RLS POLICIES
+-- CREATE RLS POLICIES (drop and recreate)
 -- ========================================
+
+-- Drop existing policies first
+DROP POLICY IF EXISTS "Enable read for all users" ON website_settings;
+DROP POLICY IF EXISTS "Enable insert for authenticated" ON website_settings;
+DROP POLICY IF EXISTS "Enable update for authenticated" ON website_settings;
+
+DROP POLICY IF EXISTS "Enable read for all users" ON courts;
+DROP POLICY IF EXISTS "Enable insert for authenticated" ON courts;
+DROP POLICY IF EXISTS "Enable update for authenticated" ON courts;
+DROP POLICY IF EXISTS "Enable delete for authenticated" ON courts;
+
+DROP POLICY IF EXISTS "Enable read for all users" ON pricing;
+DROP POLICY IF EXISTS "Enable insert for authenticated" ON pricing;
+DROP POLICY IF EXISTS "Enable update for authenticated" ON pricing;
+DROP POLICY IF EXISTS "Enable delete for authenticated" ON pricing;
+
+DROP POLICY IF EXISTS "Enable read for all users" ON payment_methods;
+DROP POLICY IF EXISTS "Enable insert for authenticated" ON payment_methods;
+DROP POLICY IF EXISTS "Enable update for authenticated" ON payment_methods;
+DROP POLICY IF EXISTS "Enable delete for authenticated" ON payment_methods;
+
+DROP POLICY IF EXISTS "Enable read for all users" ON admin_accounts;
+DROP POLICY IF EXISTS "Enable insert for authenticated" ON admin_accounts;
+DROP POLICY IF EXISTS "Enable update for authenticated" ON admin_accounts;
+DROP POLICY IF EXISTS "Enable delete for authenticated" ON admin_accounts;
+
+DROP POLICY IF EXISTS "Enable read for all users" ON admin_logs;
+DROP POLICY IF EXISTS "Enable insert for authenticated" ON admin_logs;
 
 -- Website Settings policies
 CREATE POLICY "Enable read for all users" ON website_settings
