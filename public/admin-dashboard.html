@@ -7,6 +7,55 @@
   <link rel="stylesheet" href="admin-dashboard-styles.css">
 </head>
 <body>
+  <!-- Login Modal -->
+  <div id="loginModal" class="login-modal active">
+    <div class="login-container">
+      <div class="login-box">
+        <div class="login-header">
+          <div class="login-logo">🎾</div>
+          <h1>Velarde Courtside</h1>
+          <p>Admin Dashboard</p>
+        </div>
+        
+        <form id="loginForm" class="login-form">
+          <div class="form-group">
+            <label for="loginUsername">Username</label>
+            <input 
+              type="text" 
+              id="loginUsername" 
+              placeholder="Enter your username"
+              required
+            >
+          </div>
+          
+          <div class="form-group">
+            <label for="loginPassword">Password</label>
+            <input 
+              type="password" 
+              id="loginPassword" 
+              placeholder="Enter your password"
+              required
+            >
+          </div>
+          
+          <div class="form-group checkbox">
+            <input type="checkbox" id="rememberMe">
+            <label for="rememberMe">Remember me</label>
+          </div>
+          
+          <button type="submit" class="btn btn-primary btn-login">Sign In</button>
+          
+          <div id="loginError" class="login-error" style="display: none;">
+            <span id="loginErrorMessage"></span>
+          </div>
+        </form>
+        
+        <div class="login-footer">
+          <p>Default credentials: <strong>admin</strong> / <strong>admin123</strong></p>
+        </div>
+      </div>
+    </div>
+  </div>
   <div class="admin-container">
     <!-- Sidebar -->
     <aside class="sidebar">

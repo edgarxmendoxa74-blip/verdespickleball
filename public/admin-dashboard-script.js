@@ -3,38 +3,115 @@ const ADMIN_API = 'http://localhost:5000/api/admin';
 
 let currentUser = null;
 let currentEditingId = null;
+let isLoggedIn = false;
 
 // Initialize
 document.addEventListener('DOMContentLoaded', () => {
-  checkAdminAuth();
+  setupLoginForm();
+  checkAndInitialize();
+});
+
+function setupLoginForm() {
+  const loginForm = document.getElementById('loginForm');
+  if (loginForm) {
+    loginForm.addEventListener('submit', handleLogin);
+  }
+}
+
+function handleLogin(e) {
+  e.preventDefault();
+  
+  const username = document.getElementById('loginUsername').value.trim();
+  const password = document.getElementById('loginPassword').value;
+  const rememberMe = document.getElementById('rememberMe').checked;
+  
+  const errorDiv = document.getElementById('loginError');
+  const errorMsg = document.getElementById('loginErrorMessage');
+  
+  // Simple authentication (default: admin/admin123)
+  if (username === 'admin' && password === 'admin123') {
+    // Clear error
+    errorDiv.style.display = 'none';
+    
+    // Save credentials if remember me is checked
+    if (rememberMe) {
+      localStorage.setItem('adminUsername', username);
+      localStorage.setItem('rememberMe', 'true');
+    }
+    
+    // Set login session
+    localStorage.setItem('adminToken', 'token-' + Date.now());
+    localStorage.setItem('adminUsername', username);
+    isLoggedIn = true;
+    
+    // Hide login modal and initialize dashboard
+    const loginModal = document.getElementById('loginModal');
+    loginModal.classList.remove('active');
+    
+    // Initialize dashboard
+    initializeDashboard();
+  } else {
+    // Show error
+    errorMsg.textContent = 'Invalid username or password';
+    errorDiv.style.display = 'flex';
+  }
+}
+
+function checkAndInitialize() {
+  const token = localStorage.getItem('adminToken');
+  const savedUsername = localStorage.getItem('adminUsername');
+  const rememberMe = localStorage.getItem('rememberMe');
+  
+  if (token) {
+    // Already logged in
+    isLoggedIn = true;
+    const loginModal = document.getElementById('loginModal');
+    loginModal.classList.remove('active');
+    initializeDashboard();
+  } else {
+    // Show login modal
+    const loginModal = document.getElementById('loginModal');
+    loginModal.classList.add('active');
+    
+    // Pre-fill if remember me was used
+    if (rememberMe && savedUsername) {
+      document.getElementById('loginUsername').value = savedUsername;
+      document.getElementById('rememberMe').checked = true;
+    }
+  }
+}
+
+function initializeDashboard() {
   updateCurrentTime();
   setInterval(updateCurrentTime, 1000);
   loadDashboard();
   setupFormListeners();
-});
-
-function checkAdminAuth() {
-  const token = localStorage.getItem('adminToken');
-  if (!token) {
-    // Redirect to login if not authenticated
-    const password = prompt('Enter admin password:');
-    if (password === 'admin123') {
-      localStorage.setItem('adminToken', 'token-' + Date.now());
-      localStorage.setItem('adminUsername', 'admin');
-    } else {
-      alert('Invalid password');
-      window.location.href = '/admin.html';
-    }
-  }
-  
-  const username = localStorage.getItem('adminUsername') || 'Admin';
-  document.getElementById('adminUser').textContent = `👤 ${username}`;
+  updateAdminUser();
 }
 
 function logout() {
-  localStorage.removeItem('adminToken');
-  localStorage.removeItem('adminUsername');
-  window.location.href = '/admin.html';
+  if (confirm('Are you sure you want to logout?')) {
+    localStorage.removeItem('adminToken');
+    localStorage.removeItem('adminUsername');
+    localStorage.removeItem('rememberMe');
+    isLoggedIn = false;
+    
+    // Show login modal again
+    const loginModal = document.getElementById('loginModal');
+    loginModal.classList.add('active');
+    
+    // Clear form
+    document.getElementById('loginForm').reset();
+    document.getElementById('loginError').style.display = 'none';
+  }
+}
+
+function updateAdminUser() {
+  const username = localStorage.getItem('adminUsername') || 'Admin';
+  const adminUserElement = document.getElementById('adminUser');
+  if (adminUserElement) {
+    adminUserElement.textContent = `👤 ${username}`;
+  }
 }
 
 function updateCurrentTime() {
