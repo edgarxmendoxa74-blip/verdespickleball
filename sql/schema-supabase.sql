@@ -1,7 +1,9 @@
 -- ========================================
 -- VELARDE COURTSIDE DATABASE SCHEMA
+-- SUPABASE COMPATIBLE VERSION
 -- ========================================
 -- Run this script to create all necessary tables for the booking system
+-- This version is tested and compatible with Supabase PostgreSQL
 
 -- ========================================
 -- 1. USERS TABLE
@@ -183,6 +185,25 @@ LEFT JOIN users u ON b.user_id = u.id
 WHERE t.check_out_time IS NOT NULL
 ORDER BY b.booking_date DESC;
 
+-- Pending payments view
+CREATE OR REPLACE VIEW pending_payments AS
+SELECT 
+  p.id,
+  p.booking_id,
+  p.amount,
+  p.reference_number,
+  p.created_at,
+  b.booking_date,
+  b.start_time,
+  u.name,
+  u.email,
+  u.phone
+FROM payments p
+LEFT JOIN bookings b ON p.booking_id = b.id
+LEFT JOIN users u ON p.user_id = u.id
+WHERE p.status = 'pending'
+ORDER BY p.created_at DESC;
+
 -- ========================================
 -- 6. ENABLE ROW LEVEL SECURITY (RLS)
 -- ========================================
@@ -197,14 +218,17 @@ ALTER TABLE time_tracking ENABLE ROW LEVEL SECURITY;
 -- WARNING: For production, implement proper authentication policies
 
 -- Users table policies
-CREATE POLICY "Enable insert for authenticated users" ON users
+CREATE POLICY "Enable insert for all users" ON users
   FOR INSERT WITH CHECK (true);
 
 CREATE POLICY "Enable read for all users" ON users
   FOR SELECT USING (true);
 
+CREATE POLICY "Enable update for all users" ON users
+  FOR UPDATE USING (true);
+
 -- Bookings table policies
-CREATE POLICY "Enable insert for authenticated users" ON bookings
+CREATE POLICY "Enable insert for all users" ON bookings
   FOR INSERT WITH CHECK (true);
 
 CREATE POLICY "Enable read for all users" ON bookings
@@ -213,8 +237,11 @@ CREATE POLICY "Enable read for all users" ON bookings
 CREATE POLICY "Enable update for all users" ON bookings
   FOR UPDATE USING (true);
 
+CREATE POLICY "Enable delete for all users" ON bookings
+  FOR DELETE USING (true);
+
 -- Payments table policies
-CREATE POLICY "Enable insert for authenticated users" ON payments
+CREATE POLICY "Enable insert for all users" ON payments
   FOR INSERT WITH CHECK (true);
 
 CREATE POLICY "Enable read for all users" ON payments
@@ -223,8 +250,11 @@ CREATE POLICY "Enable read for all users" ON payments
 CREATE POLICY "Enable update for all users" ON payments
   FOR UPDATE USING (true);
 
+CREATE POLICY "Enable delete for all users" ON payments
+  FOR DELETE USING (true);
+
 -- Time tracking table policies
-CREATE POLICY "Enable insert for authenticated users" ON time_tracking
+CREATE POLICY "Enable insert for all users" ON time_tracking
   FOR INSERT WITH CHECK (true);
 
 CREATE POLICY "Enable read for all users" ON time_tracking
@@ -233,11 +263,14 @@ CREATE POLICY "Enable read for all users" ON time_tracking
 CREATE POLICY "Enable update for all users" ON time_tracking
   FOR UPDATE USING (true);
 
+CREATE POLICY "Enable delete for all users" ON time_tracking
+  FOR DELETE USING (true);
+
 -- ========================================
 -- 7. CREATE FUNCTIONS FOR COMMON OPERATIONS
 -- ========================================
 
--- Function to get available time slots
+-- Function to get available time slots (Supabase compatible)
 CREATE OR REPLACE FUNCTION get_available_slots(p_date DATE)
 RETURNS TABLE(time_slot TIME) AS $$
 WITH working_hours AS (
@@ -264,17 +297,37 @@ CREATE OR REPLACE FUNCTION calculate_actual_duration()
 RETURNS TRIGGER AS $$
 BEGIN
   IF NEW.check_out_time IS NOT NULL THEN
-    NEW.actual_duration_minutes := EXTRACT(EPOCH FROM (NEW.check_out_time - NEW.check_in_time)) / 60;
+    NEW.actual_duration_minutes := EXTRACT(EPOCH FROM (NEW.check_out_time - NEW.check_in_time))::integer / 60;
   END IF;
   RETURN NEW;
 END;
 $$ LANGUAGE plpgsql;
+
+-- Drop trigger if it exists
+DROP TRIGGER IF EXISTS trigger_calculate_duration ON time_tracking;
 
 -- Trigger to automatically calculate duration on checkout
 CREATE TRIGGER trigger_calculate_duration
 BEFORE UPDATE ON time_tracking
 FOR EACH ROW
 EXECUTE FUNCTION calculate_actual_duration();
+
+-- Function to get dashboard stats
+CREATE OR REPLACE FUNCTION get_dashboard_stats()
+RETURNS TABLE(
+  total_bookings BIGINT,
+  confirmed_bookings BIGINT,
+  total_revenue NUMERIC,
+  today_bookings BIGINT,
+  total_users BIGINT
+) AS $$
+SELECT 
+  (SELECT COUNT(*) FROM bookings),
+  (SELECT COUNT(*) FROM bookings WHERE status = 'confirmed'),
+  (SELECT COALESCE(SUM(amount), 0) FROM payments WHERE status = 'completed'),
+  (SELECT COUNT(*) FROM bookings WHERE booking_date = CURRENT_DATE),
+  (SELECT COUNT(*) FROM users);
+$$ LANGUAGE SQL;
 
 -- ========================================
 -- 8. SAMPLE DATA (For Testing - Optional)
@@ -283,47 +336,72 @@ EXECUTE FUNCTION calculate_actual_duration();
 -- Uncomment the lines below to insert sample data for testing
 
 /*
--- Insert sample user
+-- Insert sample users
 INSERT INTO users (name, email, phone) VALUES
   ('Juan Dela Cruz', 'juan@example.com', '+639123456789'),
-  ('Maria Santos', 'maria@example.com', '+639987654321');
+  ('Maria Santos', 'maria@example.com', '+639987654321'),
+  ('Pedro Garcia', 'pedro@example.com', '+639456789123');
 
--- Insert sample booking
+-- Insert sample bookings
 INSERT INTO bookings (user_id, court_number, booking_date, start_time, end_time, duration_hours, price_amount, status)
-SELECT id, 1, CURRENT_DATE + INTERVAL '1 day', '09:00'::time, '11:00'::time, 2, 900, 'confirmed'
-FROM users WHERE email = 'juan@example.com';
+VALUES
+  ((SELECT id FROM users WHERE email = 'juan@example.com'), 1, CURRENT_DATE + INTERVAL '1 day', '09:00'::time, '11:00'::time, 2, 900, 'confirmed'),
+  ((SELECT id FROM users WHERE email = 'maria@example.com'), 2, CURRENT_DATE + INTERVAL '1 day', '14:00'::time, '15:00'::time, 1, 500, 'confirmed'),
+  ((SELECT id FROM users WHERE email = 'pedro@example.com'), 3, CURRENT_DATE, '10:00'::time, '13:00'::time, 3, 1200, 'confirmed');
 
--- Insert sample payment
+-- Insert sample payments
 INSERT INTO payments (booking_id, user_id, amount, status, reference_number, paid_at)
-SELECT b.id, b.user_id, b.price_amount, 'completed', 'GCH-123456789', CURRENT_TIMESTAMP
-FROM bookings b WHERE b.user_id = (SELECT id FROM users WHERE email = 'juan@example.com');
+SELECT b.id, b.user_id, b.price_amount, 'completed', 'GCH-' || substr(b.id::text, 1, 8), CURRENT_TIMESTAMP
+FROM bookings b
+WHERE b.status = 'confirmed';
 
 -- Insert sample time tracking
 INSERT INTO time_tracking (booking_id, check_in_time, check_out_time)
-SELECT id, CURRENT_TIMESTAMP - INTERVAL '2 hours', CURRENT_TIMESTAMP
-FROM bookings WHERE user_id = (SELECT id FROM users WHERE email = 'juan@example.com');
+SELECT b.id, CURRENT_TIMESTAMP - INTERVAL '2 hours', CURRENT_TIMESTAMP
+FROM bookings b
+WHERE b.status = 'confirmed'
+LIMIT 1;
 */
 
 -- ========================================
--- 9. USEFUL QUERIES FOR VERIFICATION
+-- 9. VERIFICATION QUERIES
 -- ========================================
+
+-- Run these queries to verify your setup:
 
 -- Check all tables exist
--- SELECT table_name FROM information_schema.tables WHERE table_schema = 'public';
+-- SELECT table_name FROM information_schema.tables WHERE table_schema = 'public' AND table_type = 'BASE TABLE' ORDER BY table_name;
 
 -- Check all views exist
--- SELECT table_name FROM information_schema.tables WHERE table_schema = 'public' AND table_type = 'VIEW';
+-- SELECT table_name FROM information_schema.tables WHERE table_schema = 'public' AND table_type = 'VIEW' ORDER BY table_name;
+
+-- Check available time slots for tomorrow
+-- SELECT * FROM get_available_slots(CURRENT_DATE + INTERVAL '1 day');
+
+-- Check dashboard stats
+-- SELECT * FROM get_dashboard_stats();
+
+-- Check today's schedule
+-- SELECT * FROM today_schedule;
 
 -- ========================================
--- END OF SCHEMA SETUP
+-- END OF SCHEMA SETUP - SUPABASE VERSION
 -- ========================================
 -- 
--- INSTRUCTIONS:
--- 1. Go to your Supabase project dashboard
--- 2. Navigate to SQL Editor
--- 3. Click "New Query"
--- 4. Copy and paste the entire content of this file
--- 5. Click "Run"
--- 6. All tables and views will be created
+-- INSTRUCTIONS FOR SUPABASE:
+-- 1. Go to https://app.supabase.com
+-- 2. Select your project: verdespickleball
+-- 3. Click "SQL Editor" (left sidebar)
+-- 4. Click "New Query"
+-- 5. Copy and paste THIS entire file (schema-supabase.sql)
+-- 6. Click "Run"
+-- 7. Wait for all queries to complete successfully
+-- 8. Verify tables were created by running verification queries
+--
+-- TROUBLESHOOTING:
+-- If you get errors:
+-- 1. Make sure tables don't already exist (can drop with: DROP TABLE IF EXISTS table_name CASCADE;)
+-- 2. Check that functions are created before triggers
+-- 3. Ensure RLS policies don't conflict with your needs
 --
 -- ========================================
