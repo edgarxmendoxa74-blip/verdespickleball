@@ -1,16 +1,11 @@
 {
   "version": 2,
-  "functions": {
-    "api/index.js": {
-      "maxDuration": 30
-    }
-  },
   "rewrites": [
-    { "source": "/api/(.*)",         "destination": "/api/index" },
-    { "source": "/admin",            "destination": "/public/admin.html" },
-    { "source": "/admin-dashboard",  "destination": "/public/admin-dashboard.html" },
-    { "source": "/images/(.*)",      "destination": "/public/images/$1" },
-    { "source": "/(.*\\.(css|js|png|jpg|jpeg|svg|ico|gif|woff|woff2|ttf))", "destination": "/public/$1" },
-    { "source": "/",                 "destination": "/public/index.html" }
+    { "source": "/api/(.*)",        "destination": "/api/index" },
+    { "source": "/admin",           "destination": "/public/admin.html" },
+    { "source": "/admin-dashboard", "destination": "/public/admin-dashboard.html" },
+    { "source": "/images/(.*)",     "destination": "/public/images/$1" },
+    { "source": "/(.+\\.(css|js|png|jpg|jpeg|svg|ico|gif|woff|woff2|ttf))", "destination": "/public/$1" },
+    { "source": "/",                "destination": "/public/index.html" }
   ]
 }
