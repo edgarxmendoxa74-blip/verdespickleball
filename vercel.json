@@ -1,46 +1,16 @@
 {
   "version": 2,
-  "builds": [
-    {
-      "src": "server.js",
-      "use": "@vercel/node",
-      "config": {
-        "maxDuration": 30,
-        "includeFiles": ["database.js", "admin-api.js"]
-      }
-    },
-    {
-      "src": "public/**/*",
-      "use": "@vercel/static"
+  "functions": {
+    "api/index.js": {
+      "maxDuration": 30
     }
-  ],
-  "routes": [
-    {
-      "src": "/api/(.*)",
-      "dest": "/server.js"
-    },
-    {
-      "src": "/admin",
-      "dest": "/public/admin.html"
-    },
-    {
-      "src": "/admin-dashboard",
-      "dest": "/public/admin-dashboard.html"
-    },
-    {
-      "src": "/images/(.*)",
-      "dest": "/public/images/$1"
-    },
-    {
-      "src": "/(.+\\.(css|js|png|jpg|jpeg|svg|ico|woff|woff2|ttf|gif))",
-      "dest": "/public/$1"
-    },
-    {
-      "src": "/(.*)",
-      "dest": "/public/index.html"
-    }
-  ],
-  "env": {
-    "NODE_ENV": "production"
-  }
+  },
+  "rewrites": [
+    { "source": "/api/(.*)",         "destination": "/api/index" },
+    { "source": "/admin",            "destination": "/public/admin.html" },
+    { "source": "/admin-dashboard",  "destination": "/public/admin-dashboard.html" },
+    { "source": "/images/(.*)",      "destination": "/public/images/$1" },
+    { "source": "/(.*\\.(css|js|png|jpg|jpeg|svg|ico|gif|woff|woff2|ttf))", "destination": "/public/$1" },
+    { "source": "/",                 "destination": "/public/index.html" }
+  ]
 }
