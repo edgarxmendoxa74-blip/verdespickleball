@@ -8,10 +8,22 @@ const app = express();
 app.use(cors());
 app.use(express.json());
 
-const supabase = createClient(
-  process.env.SUPABASE_URL,
-  process.env.SUPABASE_SERVICE_KEY
-);
+// ── Init Supabase ─────────────────────────────────────────────────────────────
+let supabase;
+try {
+  if (!process.env.SUPABASE_URL || !process.env.SUPABASE_SERVICE_KEY) {
+    throw new Error(`Missing env vars. SUPABASE_URL=${!!process.env.SUPABASE_URL} SUPABASE_SERVICE_KEY=${!!process.env.SUPABASE_SERVICE_KEY}`);
+  }
+  supabase = createClient(process.env.SUPABASE_URL, process.env.SUPABASE_SERVICE_KEY);
+} catch (initErr) {
+  console.error('Supabase init failed:', initErr.message);
+  // Return a clear JSON error for every route instead of crashing
+  app.use((req, res) => res.status(503).json({ error: 'Database not configured', detail: initErr.message }));
+  module.exports = app;
+}
+
+// Only register routes if supabase initialized successfully
+if (supabase) {
 
 // ── USER ROUTES ───────────────────────────────────────────────────────────────
 app.post('/api/users', async (req, res) => {
@@ -138,4 +150,6 @@ app.post('/api/admin/cancel-booking', async (req, res) => {
 // ── ADMIN ROUTES ──────────────────────────────────────────────────────────────
 setupAdminRoutes(app, supabase);
 
+// close the if(supabase) block
 module.exports = app;
+}
