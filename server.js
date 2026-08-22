@@ -379,7 +379,11 @@ app.post('/api/admin/cancel-booking', async (req, res) => {
 // ===== SETUP ADMIN ROUTES =====
 setupAdminRoutes(app, supabase);
 
-// ===== START SERVER =====
-app.listen(PORT, () => {
-  console.log(`✅ Velarde Courtside server running on http://localhost:${PORT}`);
-});
+// ===== START SERVER (local dev) / EXPORT (Vercel) =====
+if (process.env.NODE_ENV !== 'production') {
+  app.listen(PORT, () => {
+    console.log(`✅ Velarde Courtside server running on http://localhost:${PORT}`);
+  });
+}
+
+export default app;

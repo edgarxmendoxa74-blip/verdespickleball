@@ -117,6 +117,11 @@ async function loadAvailableSlots() {
   sel.innerHTML = '<option value="">Loading…</option>';
   try {
     const res  = await fetch(`${API_BASE}/available-slots/${date}`);
+    if (!res.ok) {
+      const errText = await res.text();
+      console.error('Slots API error:', res.status, errText);
+      throw new Error(`Server error ${res.status}`);
+    }
     const data = await res.json();
     sel.innerHTML = '<option value="">Select start time</option>';
     if (data.availableSlots && data.availableSlots.length) {
@@ -128,9 +133,10 @@ async function loadAvailableSlots() {
     } else {
       sel.innerHTML = '<option disabled>No slots available for this date</option>';
     }
-  } catch {
+  } catch (err) {
+    console.error('loadAvailableSlots error:', err);
     sel.innerHTML = '<option value="">Select start time</option>';
-    showNotification('Could not load time slots', 'error');
+    showNotification('Could not load time slots. Please refresh and try again.', 'error');
   }
 }
 
