@@ -136,7 +136,6 @@ async function loadAvailableSlots() {
   } catch (err) {
     console.error('loadAvailableSlots error:', err);
     sel.innerHTML = '<option value="">Select start time</option>';
-    showNotification('Could not load time slots. Please refresh and try again.', 'error');
   }
 }
 
