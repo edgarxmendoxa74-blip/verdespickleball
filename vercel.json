@@ -17,8 +17,24 @@
       "dest": "/server.js"
     },
     {
-      "src": "/(.*)",
+      "src": "/admin",
+      "dest": "/public/admin.html"
+    },
+    {
+      "src": "/admin-dashboard",
+      "dest": "/public/admin-dashboard.html"
+    },
+    {
+      "src": "/images/(.*)",
+      "dest": "/public/images/$1"
+    },
+    {
+      "src": "/(.+\\.(css|js|png|jpg|jpeg|svg|ico|woff|woff2|ttf|gif))",
       "dest": "/public/$1"
+    },
+    {
+      "src": "/(.*)",
+      "dest": "/public/index.html"
     }
   ],
   "env": {
