@@ -4,6 +4,9 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Admin Dashboard - Velarde Courtside</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=Poppins:wght@600;700&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="admin-styles.css">
 </head>
 <body>
@@ -11,8 +14,7 @@
     <!-- Sidebar -->
     <aside class="sidebar">
       <div class="sidebar-header">
-        <h1>🎾 Velarde Courtside</h1>
-        <p>Admin Panel</p>
+        <img src="images/logo.png" alt="Velarde Courtside Logo" class="sidebar-logo">
       </div>
       <nav class="sidebar-nav">
         <a href="#dashboard" class="nav-item active" onclick="showSection('dashboard')">Dashboard</a>
@@ -101,6 +103,7 @@
                 <th>Court</th>
                 <th>Duration</th>
                 <th>Amount</th>
+                <th>Payment</th>
                 <th>Status</th>
                 <th>Actions</th>
               </tr>

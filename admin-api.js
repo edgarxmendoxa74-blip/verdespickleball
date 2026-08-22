@@ -1,5 +1,24 @@
 // Admin API Endpoints Extension
-// Add these routes to your Express server in server.js
+import { v4 as uuidv4 } from 'uuid';
+import multer from 'multer';
+import path from 'path';
+import fs from 'fs';
+
+// Configure Multer storage
+const storage = multer.diskStorage({
+  destination: function (req, file, cb) {
+    const uploadDir = path.join(process.cwd(), 'public', 'images', 'uploads');
+    if (!fs.existsSync(uploadDir)) {
+      fs.mkdirSync(uploadDir, { recursive: true });
+    }
+    cb(null, uploadDir);
+  },
+  filename: function (req, file, cb) {
+    const uniqueSuffix = Date.now() + '-' + Math.round(Math.random() * 1E9);
+    cb(null, uniqueSuffix + path.extname(file.originalname));
+  }
+});
+const upload = multer({ storage: storage });
 
 export function setupAdminRoutes(app, db) {
   const dbRun = (sql, params = []) => new Promise((resolve, reject) => {
@@ -23,6 +42,77 @@ export function setupAdminRoutes(app, db) {
     });
   });
 
+  // Activity logger
+  const logActivity = async (adminId, action, entityType, entityId) => {
+    try {
+      await dbRun(
+        'INSERT INTO admin_logs (id, admin_id, action, entity_type, entity_id) VALUES (?, ?, ?, ?, ?)',
+        [uuidv4(), adminId || null, action, entityType || null, entityId || null]
+      );
+    } catch (err) {
+      console.error('Failed to write activity log:', err.message);
+    }
+  };
+
+  const currentAdminId = async () => {
+    try {
+      const admin = await dbGet("SELECT id FROM admin_accounts WHERE username = ? LIMIT 1", ['admin']);
+      return admin ? admin.id : null;
+    } catch {
+      return null;
+    }
+  };
+
+  // ===== FILE UPLOAD =====
+
+  app.post('/api/admin/upload-image', upload.single('image'), (req, res) => {
+    try {
+      if (!req.file) {
+        return res.status(400).json({ error: 'No file uploaded' });
+      }
+      res.json({ url: `/images/uploads/${req.file.filename}` });
+    } catch (error) {
+      res.status(500).json({ error: 'Failed to upload image' });
+    }
+  });
+
+  app.post('/api/admin/upload-logo', upload.single('logo'), (req, res) => {
+    try {
+      if (!req.file) {
+        return res.status(400).json({ error: 'No file uploaded' });
+      }
+      // Usually, you'd save it to a specific logo location or return the URL
+      // We'll return the URL of the new upload and update the website settings
+      res.json({ url: `/images/uploads/${req.file.filename}` });
+    } catch (error) {
+      res.status(500).json({ error: 'Failed to upload logo' });
+    }
+  });
+
+  // ===== ADMIN LOGIN =====
+
+  app.post('/api/admin/login', async (req, res) => {
+    try {
+      const { username, password } = req.body;
+      if (!username || !password) return res.status(400).json({ error: 'Username and password required' });
+
+      const account = await dbGet('SELECT * FROM admin_accounts WHERE username = ?', [username]);
+      if (!account || !account.is_active) {
+        return res.status(401).json({ error: 'Invalid username or password' });
+      }
+      if (account.password_hash !== password) {
+        return res.status(401).json({ error: 'Invalid username or password' });
+      }
+
+      await dbRun('UPDATE admin_accounts SET last_login = CURRENT_TIMESTAMP WHERE id = ?', [account.id]);
+      logActivity(account.id, 'login', 'admin_account', account.id);
+
+      res.json({ success: true, token: 'admin-token-' + Date.now(), username: account.username, fullName: account.full_name, role: account.role });
+    } catch (error) {
+      res.status(500).json({ error: 'Login failed' });
+    }
+  });
+
   // ===== WEBSITE SETTINGS =====
   
   app.get('/api/admin/website-settings', async (req, res) => {
@@ -44,15 +134,16 @@ export function setupAdminRoutes(app, db) {
 
   app.post('/api/admin/website-settings', async (req, res) => {
     try {
-      const { site_name, phone, email, address, operating_hours_start, operating_hours_end, site_description, about_text, terms_text } = req.body;
+      const { site_name, phone, email, address, operating_hours_start, operating_hours_end, site_description, about_text, terms_text, logo_url } = req.body;
       
-      const id = require('uuid').v4();
+      const id = uuidv4();
       await dbRun(`
         INSERT OR REPLACE INTO website_settings 
-        (id, site_name, phone, email, address, operating_hours_start, operating_hours_end, site_description, about_text, terms_text, updated_at)
-        VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, CURRENT_TIMESTAMP)
-      `, [id, site_name, phone, email, address, operating_hours_start, operating_hours_end, site_description, about_text, terms_text]);
+        (id, site_name, phone, email, address, operating_hours_start, operating_hours_end, site_description, about_text, terms_text, logo_url, updated_at)
+        VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, CURRENT_TIMESTAMP)
+      `, [id, site_name, phone, email, address, operating_hours_start, operating_hours_end, site_description, about_text, terms_text, logo_url]);
       
+      await logActivity(await currentAdminId(), 'update', 'Website settings', id);
       res.json({ success: true, message: 'Settings saved' });
     } catch (error) {
       res.status(500).json({ error: 'Failed to save settings' });
@@ -84,14 +175,15 @@ export function setupAdminRoutes(app, db) {
 
   app.post('/api/admin/courts', async (req, res) => {
     try {
-      const { court_number, name, description, capacity, surface_type, status } = req.body;
-      const id = require('uuid').v4();
+      const { court_number, name, description, capacity, surface_type, status, image_url } = req.body;
+      const id = uuidv4();
       
       await dbRun(`
-        INSERT INTO courts (id, court_number, name, description, capacity, surface_type, status)
-        VALUES (?, ?, ?, ?, ?, ?, ?)
-      `, [id, court_number, name, description, capacity || 4, surface_type, status || 'active']);
+        INSERT INTO courts (id, court_number, name, description, capacity, surface_type, status, image_url)
+        VALUES (?, ?, ?, ?, ?, ?, ?, ?)
+      `, [id, court_number, name, description, capacity || 4, surface_type, status || 'active', image_url]);
       
+      await logActivity(await currentAdminId(), 'create', 'Court', id);
       res.status(201).json({ id, message: 'Court created' });
     } catch (error) {
       res.status(500).json({ error: 'Failed to create court' });
@@ -100,14 +192,15 @@ export function setupAdminRoutes(app, db) {
 
   app.put('/api/admin/courts/:id', async (req, res) => {
     try {
-      const { court_number, name, description, capacity, surface_type, status } = req.body;
+      const { court_number, name, description, capacity, surface_type, status, image_url } = req.body;
       
       await dbRun(`
         UPDATE courts 
-        SET court_number = ?, name = ?, description = ?, capacity = ?, surface_type = ?, status = ?, updated_at = CURRENT_TIMESTAMP
+        SET court_number = ?, name = ?, description = ?, capacity = ?, surface_type = ?, status = ?, image_url = ?, updated_at = CURRENT_TIMESTAMP
         WHERE id = ?
-      `, [court_number, name, description, capacity, surface_type, status, req.params.id]);
+      `, [court_number, name, description, capacity, surface_type, status, image_url, req.params.id]);
       
+      await logActivity(await currentAdminId(), 'update', 'Court', req.params.id);
       res.json({ success: true, message: 'Court updated' });
     } catch (error) {
       res.status(500).json({ error: 'Failed to update court' });
@@ -117,6 +210,7 @@ export function setupAdminRoutes(app, db) {
   app.delete('/api/admin/courts/:id', async (req, res) => {
     try {
       await dbRun('DELETE FROM courts WHERE id = ?', [req.params.id]);
+      await logActivity(await currentAdminId(), 'delete', 'Court', req.params.id);
       res.json({ success: true, message: 'Court deleted' });
     } catch (error) {
       res.status(500).json({ error: 'Failed to delete court' });
@@ -149,13 +243,14 @@ export function setupAdminRoutes(app, db) {
   app.post('/api/admin/pricing', async (req, res) => {
     try {
       const { duration_hours, price_amount, day_type, description, is_active } = req.body;
-      const id = require('uuid').v4();
+      const id = uuidv4();
       
       await dbRun(`
         INSERT INTO pricing (id, duration_hours, price_amount, day_type, description, is_active)
         VALUES (?, ?, ?, ?, ?, ?)
       `, [id, duration_hours, price_amount, day_type || 'weekday', description, is_active !== false ? 1 : 0]);
       
+      await logActivity(await currentAdminId(), 'create', 'Pricing', id);
       res.status(201).json({ id, message: 'Pricing created' });
     } catch (error) {
       res.status(500).json({ error: 'Failed to create pricing' });
@@ -172,6 +267,7 @@ export function setupAdminRoutes(app, db) {
         WHERE id = ?
       `, [duration_hours, price_amount, day_type, description, is_active ? 1 : 0, req.params.id]);
       
+      await logActivity(await currentAdminId(), 'update', 'Pricing', req.params.id);
       res.json({ success: true, message: 'Pricing updated' });
     } catch (error) {
       res.status(500).json({ error: 'Failed to update pricing' });
@@ -181,6 +277,7 @@ export function setupAdminRoutes(app, db) {
   app.delete('/api/admin/pricing/:id', async (req, res) => {
     try {
       await dbRun('DELETE FROM pricing WHERE id = ?', [req.params.id]);
+      await logActivity(await currentAdminId(), 'delete', 'Pricing', req.params.id);
       res.json({ success: true, message: 'Pricing deleted' });
     } catch (error) {
       res.status(500).json({ error: 'Failed to delete pricing' });
@@ -212,14 +309,15 @@ export function setupAdminRoutes(app, db) {
 
   app.post('/api/admin/payment-methods', async (req, res) => {
     try {
-      const { method_name, description, instructions, account_details, is_active } = req.body;
-      const id = require('uuid').v4();
+      const { method_name, description, instructions, account_details, is_active, qr_code_url } = req.body;
+      const id = uuidv4();
       
       await dbRun(`
-        INSERT INTO payment_methods (id, method_name, description, instructions, account_details, is_active)
-        VALUES (?, ?, ?, ?, ?, ?)
-      `, [id, method_name, description, instructions, account_details, is_active !== false ? 1 : 0]);
+        INSERT INTO payment_methods (id, method_name, description, instructions, account_details, is_active, qr_code_url)
+        VALUES (?, ?, ?, ?, ?, ?, ?)
+      `, [id, method_name, description, instructions, account_details, is_active !== false ? 1 : 0, qr_code_url]);
       
+      await logActivity(await currentAdminId(), 'create', 'Payment method', id);
       res.status(201).json({ id, message: 'Payment method created' });
     } catch (error) {
       res.status(500).json({ error: 'Failed to create payment method' });
@@ -228,14 +326,15 @@ export function setupAdminRoutes(app, db) {
 
   app.put('/api/admin/payment-methods/:id', async (req, res) => {
     try {
-      const { method_name, description, instructions, account_details, is_active } = req.body;
+      const { method_name, description, instructions, account_details, is_active, qr_code_url } = req.body;
       
       await dbRun(`
         UPDATE payment_methods 
-        SET method_name = ?, description = ?, instructions = ?, account_details = ?, is_active = ?, updated_at = CURRENT_TIMESTAMP
+        SET method_name = ?, description = ?, instructions = ?, account_details = ?, is_active = ?, qr_code_url = ?, updated_at = CURRENT_TIMESTAMP
         WHERE id = ?
-      `, [method_name, description, instructions, account_details, is_active ? 1 : 0, req.params.id]);
+      `, [method_name, description, instructions, account_details, is_active ? 1 : 0, qr_code_url, req.params.id]);
       
+      await logActivity(await currentAdminId(), 'update', 'Payment method', req.params.id);
       res.json({ success: true, message: 'Payment method updated' });
     } catch (error) {
       res.status(500).json({ error: 'Failed to update payment method' });
@@ -245,6 +344,7 @@ export function setupAdminRoutes(app, db) {
   app.delete('/api/admin/payment-methods/:id', async (req, res) => {
     try {
       await dbRun('DELETE FROM payment_methods WHERE id = ?', [req.params.id]);
+      await logActivity(await currentAdminId(), 'delete', 'Payment method', req.params.id);
       res.json({ success: true, message: 'Payment method deleted' });
     } catch (error) {
       res.status(500).json({ error: 'Failed to delete payment method' });
@@ -313,6 +413,7 @@ export function setupAdminRoutes(app, db) {
         WHERE id = ?
       `, [court_number, booking_date, start_time, endTime, duration_hours, status, req.params.id]);
       
+      await logActivity(await currentAdminId(), 'update', 'Booking', req.params.id);
       res.json({ success: true, message: 'Booking updated' });
     } catch (error) {
       res.status(500).json({ error: 'Failed to update booking' });
@@ -322,6 +423,7 @@ export function setupAdminRoutes(app, db) {
   app.delete('/api/admin/bookings/:id', async (req, res) => {
     try {
       await dbRun('DELETE FROM bookings WHERE id = ?', [req.params.id]);
+      await logActivity(await currentAdminId(), 'delete', 'Booking', req.params.id);
       res.json({ success: true, message: 'Booking deleted' });
     } catch (error) {
       res.status(500).json({ error: 'Failed to delete booking' });
@@ -362,13 +464,14 @@ export function setupAdminRoutes(app, db) {
   app.post('/api/admin/accounts', async (req, res) => {
     try {
       const { username, email, full_name, password, role, is_active } = req.body;
-      const id = require('uuid').v4();
+      const id = uuidv4();
       
       await dbRun(`
         INSERT INTO admin_accounts (id, username, email, full_name, password_hash, role, is_active)
         VALUES (?, ?, ?, ?, ?, ?, ?)
       `, [id, username, email, full_name, password, role || 'admin', is_active !== false ? 1 : 0]);
       
+      await logActivity(await currentAdminId(), 'create', 'Admin account', id);
       res.status(201).json({ id, message: 'Admin account created' });
     } catch (error) {
       res.status(500).json({ error: 'Failed to create admin account' });
@@ -391,6 +494,7 @@ export function setupAdminRoutes(app, db) {
       params.push(req.params.id);
       
       await dbRun(query, params);
+      await logActivity(await currentAdminId(), 'update', 'Admin account', req.params.id);
       res.json({ success: true, message: 'Admin account updated' });
     } catch (error) {
       res.status(500).json({ error: 'Failed to update admin account' });
@@ -400,6 +504,7 @@ export function setupAdminRoutes(app, db) {
   app.delete('/api/admin/accounts/:id', async (req, res) => {
     try {
       await dbRun('DELETE FROM admin_accounts WHERE id = ?', [req.params.id]);
+      await logActivity(await currentAdminId(), 'delete', 'Admin account', req.params.id);
       res.json({ success: true, message: 'Admin account deleted' });
     } catch (error) {
       res.status(500).json({ error: 'Failed to delete admin account' });

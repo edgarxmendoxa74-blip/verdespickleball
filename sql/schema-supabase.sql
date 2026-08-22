@@ -205,6 +205,107 @@ WHERE p.status = 'pending'
 ORDER BY p.created_at DESC;
 
 -- ========================================
+-- ADMIN MANAGEMENT TABLES
+-- ========================================
+
+-- Website Settings Table
+CREATE TABLE IF NOT EXISTS website_settings (
+  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+  site_name VARCHAR(255) NOT NULL DEFAULT 'Velarde Courtside',
+  site_description TEXT,
+  phone VARCHAR(20),
+  email VARCHAR(255),
+  address TEXT,
+  operating_hours_start TIME DEFAULT '07:00'::time,
+  operating_hours_end TIME DEFAULT '19:00'::time,
+  logo_url VARCHAR(500),
+  about_text TEXT,
+  terms_text TEXT,
+  privacy_text TEXT,
+  created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+  updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);
+
+-- Courts Management Table
+CREATE TABLE IF NOT EXISTS courts (
+  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+  court_number INTEGER NOT NULL UNIQUE CHECK (court_number BETWEEN 1 AND 10),
+  name VARCHAR(255) NOT NULL,
+  description TEXT,
+  capacity INTEGER DEFAULT 4,
+  surface_type VARCHAR(100),
+  amenities TEXT,
+  status VARCHAR(50) DEFAULT 'active' CHECK (status IN ('active', 'maintenance', 'inactive')),
+  image_url VARCHAR(500),
+  created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+  updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);
+
+-- Pricing Table
+CREATE TABLE IF NOT EXISTS pricing (
+  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+  duration_hours INTEGER NOT NULL UNIQUE CHECK (duration_hours > 0),
+  price_amount DECIMAL(10, 2) NOT NULL,
+  day_type VARCHAR(50) DEFAULT 'weekday' CHECK (day_type IN ('weekday', 'weekend', 'holiday')),
+  description VARCHAR(255),
+  is_active BOOLEAN DEFAULT true,
+  created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+  updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);
+
+-- Payment Methods Table
+CREATE TABLE IF NOT EXISTS payment_methods (
+  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+  method_name VARCHAR(100) NOT NULL UNIQUE,
+  description TEXT,
+  instructions TEXT,
+  account_details TEXT,
+  qr_code_url VARCHAR(500),
+  is_active BOOLEAN DEFAULT true,
+  sort_order INTEGER DEFAULT 0,
+  created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+  updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);
+
+-- Admin Accounts Table
+CREATE TABLE IF NOT EXISTS admin_accounts (
+  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+  username VARCHAR(255) NOT NULL UNIQUE,
+  email VARCHAR(255) UNIQUE,
+  password_hash VARCHAR(255) NOT NULL,
+  full_name VARCHAR(255),
+  role VARCHAR(50) DEFAULT 'admin' CHECK (role IN ('super_admin', 'admin', 'manager')),
+  permissions TEXT,
+  is_active BOOLEAN DEFAULT true,
+  last_login TIMESTAMP,
+  created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+  updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);
+
+-- Admin Activity Log
+CREATE TABLE IF NOT EXISTS admin_logs (
+  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+  admin_id UUID REFERENCES admin_accounts(id),
+  action VARCHAR(255) NOT NULL,
+  entity_type VARCHAR(100),
+  entity_id UUID,
+  old_values JSONB,
+  new_values JSONB,
+  ip_address VARCHAR(45),
+  created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);
+
+-- Create indexes for admin tables
+CREATE INDEX IF NOT EXISTS idx_courts_court_number ON courts(court_number);
+CREATE INDEX IF NOT EXISTS idx_courts_status ON courts(status);
+CREATE INDEX IF NOT EXISTS idx_pricing_duration ON pricing(duration_hours);
+CREATE INDEX IF NOT EXISTS idx_pricing_active ON pricing(is_active);
+CREATE INDEX IF NOT EXISTS idx_payment_methods_active ON payment_methods(is_active);
+CREATE INDEX IF NOT EXISTS idx_admin_accounts_username ON admin_accounts(username);
+CREATE INDEX IF NOT EXISTS idx_admin_logs_admin_id ON admin_logs(admin_id);
+CREATE INDEX IF NOT EXISTS idx_admin_logs_created_at ON admin_logs(created_at DESC);
+
+-- ========================================
 -- 6. ENABLE ROW LEVEL SECURITY (RLS)
 -- ========================================
 

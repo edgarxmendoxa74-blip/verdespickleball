@@ -1,10 +1,12 @@
 import express from 'express';
 import cors from 'cors';
 import dotenv from 'dotenv';
+import multer from 'multer';
 import sqlite3 from 'sqlite3';
 import path from 'path';
 import { fileURLToPath } from 'url';
 import { v4 as uuidv4 } from 'uuid';
+import { setupAdminRoutes } from './admin-api.js';
 
 dotenv.config();
 
@@ -84,13 +86,192 @@ function initDatabase() {
             created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
             FOREIGN KEY (booking_id) REFERENCES bookings(id)
           )
-        `, (err) => {
-          if (err) reject(err);
-          else resolve();
+        `);
+
+        // Courts table
+        db.run(`
+          CREATE TABLE IF NOT EXISTS courts (
+            id TEXT PRIMARY KEY,
+            court_number INTEGER UNIQUE NOT NULL,
+            name TEXT NOT NULL,
+            description TEXT,
+            capacity INTEGER DEFAULT 4,
+            surface_type TEXT,
+            status TEXT DEFAULT 'active',
+            created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+            updated_at DATETIME
+          )
+        `);
+
+        // Pricing table
+        db.run(`
+          CREATE TABLE IF NOT EXISTS pricing (
+            id TEXT PRIMARY KEY,
+            duration_hours INTEGER NOT NULL,
+            price_amount REAL NOT NULL,
+            day_type TEXT DEFAULT 'weekday',
+            description TEXT,
+            is_active INTEGER DEFAULT 1,
+            created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+            updated_at DATETIME
+          )
+        `);
+
+        // Payment methods table
+        db.run(`
+          CREATE TABLE IF NOT EXISTS payment_methods (
+            id TEXT PRIMARY KEY,
+            method_name TEXT NOT NULL,
+            description TEXT,
+            instructions TEXT,
+            account_details TEXT,
+            is_active INTEGER DEFAULT 1,
+            sort_order INTEGER DEFAULT 0,
+            created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+            updated_at DATETIME
+          )
+        `);
+
+        // Website settings table
+        db.run(`
+          CREATE TABLE IF NOT EXISTS website_settings (
+            id TEXT PRIMARY KEY,
+            site_name TEXT,
+            phone TEXT,
+            email TEXT,
+            address TEXT,
+            operating_hours_start TEXT DEFAULT '07:00',
+            operating_hours_end TEXT DEFAULT '19:00',
+            site_description TEXT,
+            about_text TEXT,
+            terms_text TEXT,
+            created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+            updated_at DATETIME
+          )
+        `);
+
+        // Admin accounts table
+        db.run(`
+          CREATE TABLE IF NOT EXISTS admin_accounts (
+            id TEXT PRIMARY KEY,
+            username TEXT UNIQUE NOT NULL,
+            email TEXT,
+            full_name TEXT,
+            password_hash TEXT NOT NULL,
+            role TEXT DEFAULT 'admin',
+            is_active INTEGER DEFAULT 1,
+            last_login DATETIME,
+            created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+            updated_at DATETIME
+          )
+        `);
+
+        // Admin activity log table
+        db.run(`
+          CREATE TABLE IF NOT EXISTS admin_logs (
+            id TEXT PRIMARY KEY,
+            admin_id TEXT,
+            action TEXT NOT NULL,
+            entity_type TEXT,
+            entity_id TEXT,
+            created_at DATETIME DEFAULT CURRENT_TIMESTAMP
+          )
+        `, async (err) => {
+          if (err) { reject(err); return; }
+          try {
+            // Apply schema migrations (ignore errors if columns exist)
+            await new Promise(r => db.run("ALTER TABLE courts ADD COLUMN image_url TEXT", () => r()));
+            await new Promise(r => db.run("ALTER TABLE website_settings ADD COLUMN logo_url TEXT", () => r()));
+            await new Promise(r => db.run("ALTER TABLE payment_methods ADD COLUMN qr_code_url TEXT", () => r()));
+            
+            await seedDefaultData();
+            resolve();
+          } catch (seedErr) {
+            reject(seedErr);
+          }
         });
       });
     });
   });
+}
+
+async function seedDefaultData() {
+  const courtsCount = await dbGet('SELECT COUNT(*) as count FROM courts');
+  if (courtsCount.count === 0) {
+    const courtNames = ['Court 1 - Main', 'Court 2 - Main', 'Court 3 - Side', 'Court 4 - Side'];
+    for (let i = 0; i < courtNames.length; i++) {
+      await dbRun(
+        `INSERT INTO courts (id, court_number, name, description, capacity, surface_type, status)
+         VALUES (?, ?, ?, ?, ?, ?, ?)`,
+        [uuidv4(), i + 1, courtNames[i], null, 4, 'Acrylic', 'active']
+      );
+    }
+    console.log('✅ Seeded default courts');
+  }
+
+  const pricingCount = await dbGet('SELECT COUNT(*) as count FROM pricing');
+  if (pricingCount.count === 0) {
+    const rates = [
+      [1, 250, 'weekday', 'Regular Rate'],
+      [1, 300, 'weekend', 'Weekend Rate'],
+      [2, 450, 'weekday', '2-Hour Weekday'],
+      [2, 550, 'weekend', '2-Hour Weekend']
+    ];
+    for (const [hours, amount, dayType, desc] of rates) {
+      await dbRun(
+        `INSERT INTO pricing (id, duration_hours, price_amount, day_type, description, is_active)
+         VALUES (?, ?, ?, ?, ?, 1)`,
+        [uuidv4(), hours, amount, dayType, desc]
+      );
+    }
+    console.log('✅ Seeded default pricing');
+  }
+
+  const methodsCount = await dbGet('SELECT COUNT(*) as count FROM payment_methods');
+  if (methodsCount.count === 0) {
+    await dbRun(
+      `INSERT INTO payment_methods (id, method_name, description, instructions, account_details, is_active, sort_order)
+       VALUES (?, ?, ?, ?, ?, 1, 0)`,
+      [uuidv4(), 'GCash', 'Pay instantly via GCash QR', 'Scan the GCash QR code and enter the reference number below.', '09171234567']
+    );
+    await dbRun(
+      `INSERT INTO payment_methods (id, method_name, description, instructions, account_details, is_active, sort_order)
+       VALUES (?, ?, ?, ?, ?, 1, 1)`,
+      [uuidv4(), 'Pay at Counter', 'Reserve now and pay at the venue', 'Pay in cash at the front desk before your session starts.', null]
+    );
+    console.log('✅ Seeded default payment methods');
+  }
+
+  const settingsCount = await dbGet('SELECT COUNT(*) as count FROM website_settings');
+  if (settingsCount.count === 0) {
+    await dbRun(
+      `INSERT INTO website_settings (id, site_name, phone, email, address, operating_hours_start, operating_hours_end, site_description, about_text, terms_text)
+       VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+      [
+        uuidv4(),
+        'Velarde Courtside',
+        '',
+        '',
+        '',
+        '07:00',
+        '19:00',
+        'Premium indoor pickleball courts with flexible hourly rates and instant online booking.',
+        'Velarde Courtside offers 4 premium pickleball courts open daily from 7AM to 7PM. Book online in under a minute.',
+        'All bookings are final once confirmed. Please arrive 10 minutes before your scheduled time. Cancellations must be made at least 2 hours in advance.'
+      ]
+    );
+    console.log('✅ Seeded default website settings');
+  }
+
+  const adminsCount = await dbGet('SELECT COUNT(*) as count FROM admin_accounts');
+  if (adminsCount.count === 0) {
+    await dbRun(
+      `INSERT INTO admin_accounts (id, username, email, full_name, password_hash, role, is_active)
+       VALUES (?, ?, ?, ?, ?, ?, 1)`,
+      [uuidv4(), 'admin', 'admin@velardecourtside.com', 'System Administrator', process.env.ADMIN_PASSWORD || 'admin123', 'super_admin']
+    );
+    console.log('✅ Seeded default admin account (admin / admin123)');
+  }
 }
 
 // Helper function for database queries
@@ -289,6 +470,32 @@ app.post('/api/payments/process', async (req, res) => {
   }
 });
 
+// Mark payment as pay-at-counter (stays pending until paid at venue)
+app.post('/api/payments/counter', async (req, res) => {
+  try {
+    const { paymentId } = req.body;
+
+    if (!paymentId) {
+      return res.status(400).json({ error: 'Missing paymentId' });
+    }
+
+    await dbRun(
+      `UPDATE payments SET payment_method = 'counter' WHERE id = ?`,
+      [paymentId]
+    );
+
+    res.json({
+      success: true,
+      message: 'Reservation saved. Payment pending at counter.',
+      paymentId,
+      status: 'pending'
+    });
+  } catch (error) {
+    console.error('Error setting counter payment:', error);
+    res.status(500).json({ error: 'Failed to set counter payment' });
+  }
+});
+
 // Get payment status
 app.get('/api/payments/:paymentId', async (req, res) => {
   try {
@@ -310,40 +517,19 @@ app.get('/api/payments/:paymentId', async (req, res) => {
 });
 
 // ===== ADMIN ROUTES =====
-
-// Admin login
-app.post('/api/admin/login', (req, res) => {
-  const { password } = req.body;
-  if (password === process.env.ADMIN_PASSWORD) {
-    res.json({ success: true, token: 'admin-token-' + Date.now() });
-  } else {
-    res.status(401).json({ error: 'Invalid password' });
-  }
-});
-
-// Get all bookings (admin)
-app.get('/api/admin/bookings', async (req, res) => {
-  try {
-    const bookings = await dbAll(
-      `SELECT b.*, u.name, u.email, u.phone, p.status as payment_status, t.check_in_time, t.check_out_time, t.actual_duration_minutes
-       FROM bookings b
-       JOIN users u ON b.user_id = u.id
-       LEFT JOIN payments p ON b.id = p.booking_id
-       LEFT JOIN time_tracking t ON b.id = t.booking_id
-       ORDER BY b.booking_date DESC, b.start_time DESC`
-    );
-
-    res.json(bookings);
-  } catch (error) {
-    console.error('Error fetching admin bookings:', error);
-    res.status(500).json({ error: 'Failed to fetch bookings' });
-  }
-});
+// Courts, pricing, payment methods, website settings, accounts,
+// activity log and stats routes are registered via setupAdminRoutes() below.
 
 // Check in user
 app.post('/api/admin/checkin', async (req, res) => {
   try {
     const { bookingId } = req.body;
+
+    // Ensure a tracking record exists for this booking
+    const existing = await dbGet('SELECT id FROM time_tracking WHERE booking_id = ?', [bookingId]);
+    if (!existing) {
+      await dbRun('INSERT INTO time_tracking (id, booking_id) VALUES (?, ?)', [uuidv4(), bookingId]);
+    }
 
     await dbRun(
       `UPDATE time_tracking 
@@ -413,31 +599,9 @@ app.post('/api/admin/cancel-booking', async (req, res) => {
   }
 });
 
-// Get dashboard statistics
-app.get('/api/admin/stats', async (req, res) => {
-  try {
-    const totalBookings = await dbGet('SELECT COUNT(*) as count FROM bookings');
-    const completedBookings = await dbGet('SELECT COUNT(*) as count FROM bookings WHERE status = ?', ['confirmed']);
-    const totalRevenue = await dbGet('SELECT SUM(amount) as total FROM payments WHERE status = ?', ['completed']);
-    const todayBookings = await dbGet(
-      'SELECT COUNT(*) as count FROM bookings WHERE booking_date = DATE(?)',
-      [new Date().toISOString().split('T')[0]]
-    );
-
-    res.json({
-      totalBookings: totalBookings.count,
-      completedBookings: completedBookings.count,
-      totalRevenue: totalRevenue.total || 0,
-      todayBookings: todayBookings.count
-    });
-  } catch (error) {
-    console.error('Error fetching stats:', error);
-    res.status(500).json({ error: 'Failed to fetch statistics' });
-  }
-});
-
 // Initialize and start server
 initDatabase().then(() => {
+  setupAdminRoutes(app, db);
   app.listen(PORT, () => {
     console.log(`✅ Velarde Courtside server running on http://localhost:${PORT}`);
   });

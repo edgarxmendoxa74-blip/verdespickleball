@@ -4,6 +4,9 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Admin Dashboard - Velarde Courtside</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="admin-dashboard-styles.css">
 </head>
 <body>
@@ -12,69 +15,82 @@
     <div class="login-container">
       <div class="login-box">
         <div class="login-header">
-          <div class="login-logo">🎾</div>
+          <div class="login-logo-badge">🎾</div>
           <h1>Velarde Courtside</h1>
           <p>Admin Dashboard</p>
         </div>
-        
+
         <form id="loginForm" class="login-form">
           <div class="form-group">
             <label for="loginUsername">Username</label>
-            <input 
-              type="text" 
-              id="loginUsername" 
+            <input
+              type="text"
+              id="loginUsername"
               placeholder="Enter your username"
               required
             >
           </div>
-          
+
           <div class="form-group">
             <label for="loginPassword">Password</label>
-            <input 
-              type="password" 
-              id="loginPassword" 
+            <input
+              type="password"
+              id="loginPassword"
               placeholder="Enter your password"
               required
             >
           </div>
-          
+
           <div class="form-group checkbox">
             <input type="checkbox" id="rememberMe">
             <label for="rememberMe">Remember me</label>
           </div>
-          
+
           <button type="submit" class="btn btn-primary btn-login">Sign In</button>
-          
+
           <div id="loginError" class="login-error" style="display: none;">
             <span id="loginErrorMessage"></span>
           </div>
         </form>
-        
+
         <div class="login-footer">
           <p>Default credentials: <strong>admin</strong> / <strong>admin123</strong></p>
         </div>
       </div>
     </div>
   </div>
+
+  <button id="mobileMenuToggle" class="mobile-menu-toggle" onclick="toggleSidebar()" aria-label="Toggle menu">☰</button>
+  <div id="sidebarOverlay" class="sidebar-overlay" onclick="toggleSidebar()"></div>
+
   <div class="admin-container">
     <!-- Sidebar -->
-    <aside class="sidebar">
+    <aside class="sidebar" id="sidebar">
       <div class="sidebar-header">
-        <h1>🎾 Velarde Courtside</h1>
-        <p>Admin Control Center</p>
+        <div class="sidebar-brand">
+          <div class="brand-icon-box">🎾</div>
+          <div class="sidebar-brand-text">
+            <span class="brand-name">Velarde Courtside</span>
+            <span class="brand-sub">Admin Panel</span>
+          </div>
+        </div>
       </div>
       <nav class="sidebar-nav">
-        <a href="#dashboard" class="nav-item active" onclick="navigateTo('dashboard')">Dashboard</a>
-        <a href="#website-settings" class="nav-item" onclick="navigateTo('website-settings')">Website Settings</a>
-        <a href="#courts" class="nav-item" onclick="navigateTo('courts')">Court Management</a>
-        <a href="#pricing" class="nav-item" onclick="navigateTo('pricing')">Pricing</a>
-        <a href="#payment-methods" class="nav-item" onclick="navigateTo('payment-methods')">Payment Methods</a>
-        <a href="#bookings" class="nav-item" onclick="navigateTo('bookings')">Bookings</a>
-        <a href="#time-monitoring" class="nav-item" onclick="navigateTo('time-monitoring')">Time Monitoring</a>
-        <a href="#admin-accounts" class="nav-item" onclick="navigateTo('admin-accounts')">Admin Accounts</a>
-        <a href="#activity-log" class="nav-item" onclick="navigateTo('activity-log')">Activity Log</a>
-        <a href="#" class="nav-item logout" onclick="logout()">Logout</a>
+        <span class="nav-section-label">Overview</span>
+        <a href="#dashboard" class="nav-item active" data-page="dashboard" onclick="navigateTo('dashboard')"><span class="nav-icon">📊</span>Dashboard</a>
+        <a href="#bookings" class="nav-item" data-page="bookings" onclick="navigateTo('bookings')"><span class="nav-icon">📅</span>Bookings</a>
+        <a href="#time-monitoring" class="nav-item" data-page="time-monitoring" onclick="navigateTo('time-monitoring')"><span class="nav-icon">⏱️</span>Time Monitoring</a>
+        <span class="nav-section-label">Management</span>
+        <a href="#courts" class="nav-item" data-page="courts" onclick="navigateTo('courts')"><span class="nav-icon">🏟️</span>Court Management</a>
+        <a href="#pricing" class="nav-item" data-page="pricing" onclick="navigateTo('pricing')"><span class="nav-icon">🏷️</span>Pricing</a>
+        <a href="#payment-methods" class="nav-item" data-page="payment-methods" onclick="navigateTo('payment-methods')"><span class="nav-icon">💳</span>Payment Methods</a>
+        <span class="nav-section-label">System</span>
+        <a href="#website-settings" class="nav-item" data-page="website-settings" onclick="navigateTo('website-settings')"><span class="nav-icon">⚙️</span>Website Settings</a>
+        <a href="#" class="nav-item logout" onclick="logout()"><span class="nav-icon">🚪</span>Logout</a>
       </nav>
+      <div class="sidebar-footer">
+        <span class="status-dot"></span> All systems operational
+      </div>
     </aside>
 
     <!-- Main Content -->
@@ -83,41 +99,58 @@
       <header class="admin-header">
         <h2 id="pageTitle">Dashboard</h2>
         <div class="header-actions">
-          <span id="currentTime"></span>
-          <span id="adminUser"></span>
+          <div class="header-clock" id="headerClock">
+            <span id="currentTime"></span>
+          </div>
+          <div class="header-user" id="adminUser"></div>
         </div>
       </header>
 
       <!-- Dashboard Section -->
       <section id="dashboard-section" class="section active">
         <div class="dashboard-grid">
-          <div class="stat-card">
-            <div class="stat-icon">📅</div>
+          <div class="stat-card stat-blue">
+            <div class="stat-icon-box"><span class="stat-icon">📅</span></div>
             <div class="stat-info">
               <h3>Today's Bookings</h3>
               <p class="stat-number" id="dashTodayBookings">0</p>
+              <span class="stat-trend up">▲ Live count</span>
             </div>
           </div>
-          <div class="stat-card">
-            <div class="stat-icon">✅</div>
+          <div class="stat-card stat-green">
+            <div class="stat-icon-box"><span class="stat-icon">✅</span></div>
             <div class="stat-info">
               <h3>Active Courts</h3>
               <p class="stat-number" id="dashActiveCourts">0</p>
+              <span class="stat-trend neutral">Operational</span>
             </div>
           </div>
-          <div class="stat-card">
-            <div class="stat-icon">💰</div>
+          <div class="stat-card stat-gold">
+            <div class="stat-icon-box"><span class="stat-icon">💰</span></div>
             <div class="stat-info">
               <h3>Today's Revenue</h3>
               <p class="stat-number" id="dashTodayRevenue">₱0</p>
+              <span class="stat-trend up">▲ Today only</span>
             </div>
           </div>
-          <div class="stat-card">
-            <div class="stat-icon">👥</div>
+          <div class="stat-card stat-violet">
+            <div class="stat-icon-box"><span class="stat-icon">👥</span></div>
             <div class="stat-info">
               <h3>Total Users</h3>
               <p class="stat-number" id="dashTotalUsers">0</p>
+              <span class="stat-trend neutral">Registered</span>
             </div>
+          </div>
+        </div>
+
+        <div class="welcome-panel">
+          <div class="welcome-text">
+            <h3>Welcome back 👋</h3>
+            <p>Manage courts, bookings, pricing and payments — everything you need is on this panel.</p>
+          </div>
+          <div class="welcome-actions">
+            <button onclick="navigateTo('bookings')" class="btn btn-primary">View Bookings</button>
+            <button onclick="navigateTo('time-monitoring')" class="btn btn-outline">Time Monitoring</button>
           </div>
         </div>
       </section>
@@ -127,6 +160,19 @@
         <div class="settings-container">
           <h3>Website Settings</h3>
           <form id="websiteSettingsForm" class="settings-form">
+            <div class="logo-upload-zone" id="logoUploadZone">
+              <label>Website Logo</label>
+              <div class="upload-drop-area" id="logoDropArea">
+                <input type="file" id="logoFileInput" accept="image/*" hidden>
+                <img id="logoPreview" src="images/logo.png" alt="Current Logo" class="logo-preview-image">
+                <div class="upload-placeholder" id="logoPlaceholder" style="display: none;">
+                  <span class="upload-icon">📁</span>
+                  <p>Drag & Drop logo here or <strong>Click to browse</strong></p>
+                  <small>Recommended: PNG with transparent background</small>
+                </div>
+                <button type="button" class="btn btn-secondary btn-small" onclick="document.getElementById('logoFileInput').click()">Change Logo</button>
+              </div>
+            </div>
             <div class="form-row">
               <div class="form-group">
                 <label for="siteName">Site Name</label>
@@ -166,7 +212,7 @@
               <textarea id="aboutText" rows="4"></textarea>
             </div>
             <div class="form-group">
-              <label for="termsText">Terms & Conditions</label>
+              <label for="termsText">Terms &amp; Conditions</label>
               <textarea id="termsText" rows="4"></textarea>
             </div>
             <button type="submit" class="btn btn-primary">Save Settings</button>
@@ -233,22 +279,24 @@
             <button onclick="loadBookings()" class="btn btn-secondary">Filter</button>
           </div>
         </div>
-        <table class="data-table">
-          <thead>
-            <tr>
-              <th>Date & Time</th>
-              <th>Guest</th>
-              <th>Court</th>
-              <th>Duration</th>
-              <th>Price</th>
-              <th>Status</th>
-              <th>Actions</th>
-            </tr>
-          </thead>
-          <tbody id="bookingsTableBody">
-            <tr><td colspan="7">Loading bookings...</td></tr>
-          </tbody>
-        </table>
+        <div class="table-wrapper">
+          <table class="data-table">
+            <thead>
+              <tr>
+                <th>Date &amp; Time</th>
+                <th>Guest</th>
+                <th>Court</th>
+                <th>Duration</th>
+                <th>Price</th>
+                <th>Status</th>
+                <th>Actions</th>
+              </tr>
+            </thead>
+            <tbody id="bookingsTableBody">
+              <tr><td colspan="7">Loading bookings...</td></tr>
+            </tbody>
+          </table>
+        </div>
       </section>
 
       <!-- Time Monitoring Section -->
@@ -268,22 +316,24 @@
           <h3>Admin Accounts</h3>
           <button onclick="openAdminAccountModal()" class="btn btn-primary">+ Add Admin</button>
         </div>
-        <table class="data-table">
-          <thead>
-            <tr>
-              <th>Username</th>
-              <th>Full Name</th>
-              <th>Email</th>
-              <th>Role</th>
-              <th>Status</th>
-              <th>Last Login</th>
-              <th>Actions</th>
-            </tr>
-          </thead>
-          <tbody id="adminAccountsTableBody">
-            <tr><td colspan="7">Loading admin accounts...</td></tr>
-          </tbody>
-        </table>
+        <div class="table-wrapper">
+          <table class="data-table">
+            <thead>
+              <tr>
+                <th>Username</th>
+                <th>Full Name</th>
+                <th>Email</th>
+                <th>Role</th>
+                <th>Status</th>
+                <th>Last Login</th>
+                <th>Actions</th>
+              </tr>
+            </thead>
+            <tbody id="adminAccountsTableBody">
+              <tr><td colspan="7">Loading admin accounts...</td></tr>
+            </tbody>
+          </table>
+        </div>
       </section>
 
       <!-- Activity Log Section -->
@@ -292,20 +342,23 @@
           <h3>Activity Log</h3>
           <button onclick="exportActivityLog()" class="btn btn-secondary">Export</button>
         </div>
-        <table class="data-table">
-          <thead>
-            <tr>
-              <th>Admin</th>
-              <th>Action</th>
-              <th>Entity Type</th>
-              <th>Timestamp</th>
-            </tr>
-          </thead>
-          <tbody id="activityLogTableBody">
-            <tr><td colspan="4">Loading activity log...</td></tr>
-          </tbody>
-        </table>
+        <div class="table-wrapper">
+          <table class="data-table">
+            <thead>
+              <tr>
+                <th>Admin</th>
+                <th>Action</th>
+                <th>Entity Type</th>
+                <th>Timestamp</th>
+              </tr>
+            </thead>
+            <tbody id="activityLogTableBody">
+              <tr><td colspan="4">Loading activity log...</td></tr>
+            </tbody>
+          </table>
+        </div>
       </section>
+      </div><!-- end page-body -->
     </main>
   </div>
 
@@ -344,6 +397,19 @@
             <option value="inactive">Inactive</option>
           </select>
         </div>
+        <div class="form-group">
+          <label>Court Image</label>
+          <div class="upload-drop-area" id="courtImageDropArea">
+            <input type="file" id="courtImageInput" accept="image/*" hidden>
+            <div class="upload-placeholder" id="courtImagePlaceholder">
+              <span class="upload-icon">📷</span>
+              <p>Drag & Drop image here or <strong>Click to browse</strong></p>
+            </div>
+            <img id="courtImagePreview" src="" alt="Court Preview" style="display: none;" class="court-preview-image">
+            <button type="button" id="removeCourtImageBtn" class="btn btn-danger btn-small" style="display: none;" onclick="removeCourtImage()">Remove</button>
+          </div>
+          <input type="hidden" id="courtImageUrl">
+        </div>
         <button type="submit" class="btn btn-primary">Save Court</button>
       </form>
     </div>
@@ -375,10 +441,9 @@
           <label for="pricingDescription">Description</label>
           <input type="text" id="pricingDescription" placeholder="e.g., Regular Rate">
         </div>
-        <div class="form-group">
-          <label>
-            <input type="checkbox" id="pricingActive" checked> Active
-          </label>
+        <div class="form-group checkbox">
+          <input type="checkbox" id="pricingActive" checked>
+          <label for="pricingActive">Active</label>
         </div>
         <button type="submit" class="btn btn-primary">Save Price</button>
       </form>
@@ -408,9 +473,21 @@
           <input type="text" id="methodAccountDetails" placeholder="e.g., 09171234567">
         </div>
         <div class="form-group">
-          <label>
-            <input type="checkbox" id="methodActive" checked> Active
-          </label>
+          <label>QR Code Image</label>
+          <div class="upload-drop-area" id="qrDropArea">
+            <input type="file" id="qrFileInput" accept="image/*" hidden>
+            <div class="upload-placeholder" id="qrPlaceholder">
+              <span class="upload-icon">📷</span>
+              <p>Drag & Drop QR code here or <strong>Click to browse</strong></p>
+            </div>
+            <img id="qrPreview" src="" alt="QR Preview" style="display: none;" class="court-preview-image">
+            <button type="button" id="removeQrBtn" class="btn btn-danger btn-small" style="display: none;" onclick="removeQrImage()">Remove</button>
+          </div>
+          <input type="hidden" id="qrCodeUrl">
+        </div>
+        <div class="form-group checkbox">
+          <input type="checkbox" id="methodActive" checked>
+          <label for="methodActive">Active</label>
         </div>
         <button type="submit" class="btn btn-primary">Save Payment Method</button>
       </form>
@@ -487,10 +564,9 @@
             <option value="manager">Manager</option>
           </select>
         </div>
-        <div class="form-group">
-          <label>
-            <input type="checkbox" id="adminActive" checked> Active
-          </label>
+        <div class="form-group checkbox">
+          <input type="checkbox" id="adminActive" checked>
+          <label for="adminActive">Active</label>
         </div>
         <button type="submit" class="btn btn-primary">Save Admin Account</button>
       </form>
@@ -498,5 +574,11 @@
   </div>
 
   <script src="admin-dashboard-script.js"></script>
+  <script>
+    function toggleSidebar() {
+      document.getElementById('sidebar').classList.toggle('open');
+      document.getElementById('sidebarOverlay').classList.toggle('visible');
+    }
+  </script>
 </body>
 </html>

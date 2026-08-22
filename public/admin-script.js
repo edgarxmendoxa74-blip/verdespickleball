@@ -132,7 +132,7 @@ function renderBookingsTable(bookings) {
   const tbody = document.getElementById('bookingsTableBody');
 
   if (bookings.length === 0) {
-    tbody.innerHTML = '<tr><td colspan="7" class="empty-state">No bookings found</td></tr>';
+    tbody.innerHTML = '<tr><td colspan="8" class="empty-state">No bookings found</td></tr>';
     return;
   }
 
@@ -146,6 +146,12 @@ function renderBookingsTable(bookings) {
         year: 'numeric'
       });
 
+      const paymentCell = booking.payment_status === 'completed'
+        ? '<span class="schedule-status status-confirmed">GCash Paid</span>'
+        : booking.payment_method === 'counter'
+          ? '<span class="schedule-status status-pending">Counter (Pending)</span>'
+          : '<span class="schedule-status status-pending">Pending</span>';
+
       return `
         <tr>
           <td>${formattedDate} ${booking.start_time}</td>
@@ -153,6 +159,7 @@ function renderBookingsTable(bookings) {
           <td>Court ${booking.court_number}</td>
           <td>${booking.duration_hours}h</td>
           <td>₱${booking.price_amount.toLocaleString()}</td>
+          <td>${paymentCell}</td>
           <td>
             <span class="schedule-status status-${booking.status}">
               ${capitalizeFirst(booking.status)}
