@@ -10,7 +10,7 @@
     "build": "echo 'Build complete'",
     "clean": "rm -rf node_modules package-lock.json",
     "fresh-install": "npm run clean && npm install",
-    "vercel-build": "echo 'Vercel build complete'",
+    "vercel-build": "echo 'Build complete'",
     "deploy": "vercel --prod"
   },
   "keywords": [

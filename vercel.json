@@ -4,7 +4,10 @@
     {
       "src": "server.js",
       "use": "@vercel/node",
-      "config": { "maxDuration": 30 }
+      "config": {
+        "maxDuration": 30,
+        "includeFiles": ["database.js", "admin-api.js"]
+      }
     },
     {
       "src": "public/**/*",
